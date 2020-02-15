@@ -6,8 +6,16 @@
 
 // Define piezobuzzer constants
 #define PIEZO_CHANNEL 0
-#define PIEZO_FREQUENCY 8
+#define MAX_PIEZO_FREQUENCY 2000
+#define PIEZO_RESOLUTION 8
 #define PIEZO_PIN 27
+
+#define silencePiezo() ledcWriteTone(PIEZO_CHANNEL, 0)
+#define dclear() display.clear()
+#define ddrawLogBuffer display.drawLogBuffer(0, 0)
+#define dblit display.display()
+
+// Define MQTT constants
 #define MQTT_SERIAL_PUBLISH_CH "bluecherry/backstory"
 #define MQTT_SERIAL_RECEIVER_CH "bluecherry/backstory-rec"
 #define MQTT_CLIENT_ID "deboiiiii"
@@ -22,79 +30,80 @@ const char* password = "gratiswifi";
 const char* host = "192.168.1.29";
 const int httpPort = 80;
 
-// Inialiseren van display op adres 0x3c, SDA==25 en SCL == 26
+// Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
+
+// Initialize TCP client and PubSubClient for MQTT
 WiFiClient client;
 PubSubClient psclient(client);
 
-
-
+// Initalize pieze
 void setupPiezo() {
-    ledcSetup(PIEZO_CHANNEL, 2000, PIEZO_FREQUENCY);
+    ledcSetup(PIEZO_CHANNEL, MAX_PIEZO_FREQUENCY, PIEZO_RESOLUTION);
     ledcAttachPin(PIEZO_PIN, 0);
 }
 
 void pinBeeps() {
-    // Beep drie maal
-    for (int i=0; i<3; i++) {
+    // Beep thrice
+    for (int i = 0; i < 3; i++) {
         ledcWriteTone(PIEZO_CHANNEL, 1000);
         delay(90);
-        ledcWriteTone(PIEZO_CHANNEL, 0);
+        silencePiezo();
         delay(40);
     }
 }
 
 void dprintln(const char* line) {
-    display.clear();
+    dclear();
     display.println(line);
-    display.drawLogBuffer(0, 0);
-    display.display();
+    ddrawLogBuffer();
+    dblit();
 }
 void dprintln(char* line) {
-    display.clear();
+    dclear();
     display.println(line);
-    display.drawLogBuffer(0, 0);
-    display.display();
+    ddrawLogBuffer();
+    dblit();
 }
 void dprint(const char* line) {
-    display.clear();
+    dclear();
     display.print(line);
-    display.drawLogBuffer(0, 0);
-    display.display();
+    ddrawLogBuffer();
+    dblit();
 }
 void dprint(char* line) {
-    display.clear();
+    dclear();
     display.print(line);
-    display.drawLogBuffer(0, 0);
-    display.display();
+    ddrawLogBuffer();
+    dblit();
 }
 
 void callback(char* topic, byte *payload, unsigned int length) {
-  char recv[255]="";
-  for(int i=0; i<length; i++){
-    recv[i]=(char)payload[i];
-  }
-  dprintln(recv);
+    char recv[255] = "";
+    for(int i = 0; i < length; i++){
+        recv[i] = (char)payload[i];
+    }
+    dprintln(recv);
 }
 
 void reconnect() {
-  while(!psclient.connected()) {
-    dprint("Connecting MQTT...");
-    if(psclient.connect(MQTT_CLIENT_ID)){
-      dprintln("[OK]");
-      psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
-      psclient.subscribe(MQTT_SERIAL_RECEIVER_CH);
-    } else {
-      dprintln("[FAIL]");
-      delay(5000);
+    while(!psclient.connected()) {
+        dprint("Connecting MQTT...");
+        if(psclient.connect(MQTT_CLIENT_ID)){
+            dprintln("[OK]");
+            psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
+            psclient.subscribe(MQTT_SERIAL_RECEIVER_CH);
+        } else {
+            dprintln("[FAIL]");
+            delay(5000);
+        }
     }
-  }
 }
 
 void psclientSetup(){
-  psclient.setServer(MQTT_SERVER,MQTT_PORT);
-  psclient.setCallback(callback);
-  reconnect();
+    psclient.setServer(MQTT_SERVER,MQTT_PORT);
+    psclient.setCallback(callback);
+    reconnect();
 }
 
 
@@ -117,9 +126,9 @@ void setup() {
     display.setLogBuffer(5, 30);
 
     dprintln("Booting...");
-    
+
     dprint("Connecting to WiFi");
-    
+
     WiFi.begin(ssid, password);
 
     // Print dots until connected
@@ -130,30 +139,20 @@ void setup() {
 
     dprintln("[OK]");
 
-    // TCP Client
-    
-
     // Path to connect to
     String url = "/";
     psclientSetup();
-   
-    
-  
-                 
-    
+
     //pinBeeps();
 }
 
 
 
 void loop() {
-  if(!psclient.connected()){
-    reconnect();
-  }
-  psclient.loop();
-
-  
-      psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
-      delay(500);
-  
- }
+    if(!psclient.connected()){
+        reconnect();
+    }
+    psclient.loop();
+    psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
+    delay(500);
+}
