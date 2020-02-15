@@ -51,20 +51,23 @@ class Game {
         let movementSpeed = 10;
 
         if (this.keys[65] && this._player.xPosition - this._player.radius > 0) {
-            
             this._player.SetPositionX = this._player.xPosition - movementSpeed;
+            this._player.SetPosition = 0;
         }
 
         if (this.keys[68] && this._player.xPosition + this._player.radius < innerWidth) {
             this._player.SetPositionX = this._player.xPosition + movementSpeed;
+            this._player.SetPosition = 1;
         }
 
         if (this.keys[83] && this._player.yPosition + this._player.radius < innerHeight) {
             this._player.SetPositionY = this._player.yPosition + movementSpeed;
+            this._player.SetPosition = 1;
         }
 
         if (this.keys[87] && this._player.yPosition - this._player.radius > 0) {
             this._player.SetPositionY = this._player.yPosition - movementSpeed;
+            this._player.SetPosition = 3;
         }
         
         this.update();
@@ -103,6 +106,8 @@ class Game {
         let spawnNumber = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
         let spawnKind = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
         let spawnTime = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
+
+        console.log(this._player.position);
 
         if(spawnNumber > 2){
            if(spawnKind == 1){
@@ -143,11 +148,12 @@ class Game {
             this._player.drawHealth();
             this._player.draw();
             this._score.draw();
+
         } else {
             let score = this._score.getScore; 
 
             this.context.textBaseline = "middle"; 
-            this.context.font = "30px 'Lato'";
+            this.context.font = "30px ' 'Kaushan Script";
 
             const img = new Image()
             img.src = "./assets/img/skeleton.png"

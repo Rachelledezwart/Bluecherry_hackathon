@@ -63,23 +63,29 @@ var Booster = (function (_super) {
         configurable: true
     });
     Booster.prototype.draw = function () {
-        this.context.beginPath();
-        this.context.arc(this._xPos, this._yPos, this._radius, 0, Math.PI * 2, false);
-        this.context.strokeStyle = this._colour;
-        this.context.fillStyle = this._colour;
-        this.context.stroke();
-        this.context.fill();
+        if (this._colour == '#3CB371') {
+            var img = new Image();
+            img.src = "./assets/img/cookie.png";
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
+        else {
+            var img = new Image();
+            img.src = "./assets/img/potion.png";
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
     };
     return Booster;
 }(GameItem));
 var Character = (function (_super) {
     __extends(Character, _super);
-    function Character(radius, colour, xPosition, yPosition) {
+    function Character(radius, colour, xPosition, yPosition, position) {
         if (radius === void 0) { radius = 10; }
         if (xPosition === void 0) { xPosition = 0; }
         if (yPosition === void 0) { yPosition = 0; }
+        if (position === void 0) { position = 0; }
         var _this = _super.call(this, radius, colour, xPosition, yPosition) || this;
         _this._health = 1;
+        _this.position = position;
         return _this;
     }
     Object.defineProperty(Character.prototype, "SetPositionX", {
@@ -103,6 +109,13 @@ var Character = (function (_super) {
         enumerable: true,
         configurable: true
     });
+    Object.defineProperty(Character.prototype, "SetPosition", {
+        set: function (position) {
+            this.position = position;
+        },
+        enumerable: true,
+        configurable: true
+    });
     Object.defineProperty(Character.prototype, "health", {
         get: function () {
             return this._health;
@@ -111,9 +124,21 @@ var Character = (function (_super) {
         configurable: true
     });
     Character.prototype.draw = function () {
-        var img = new Image();
-        img.src = "./assets/img/wizard.png";
-        this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        if (this.position == 0) {
+            var img = new Image();
+            img.src = "./assets/img/wizard.png";
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
+        else if (this.position == 3) {
+            var img = new Image();
+            img.src = "./assets/img/wizard_3.png";
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
+        else {
+            var img = new Image();
+            img.src = "./assets/img/wizard_2.png";
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
     };
     Character.prototype.drawHealth = function () {
         this.context.font = "30px 'Lato'";
@@ -133,15 +158,19 @@ var Game = (function () {
             var movementSpeed = 10;
             if (_this.keys[65] && _this._player.xPosition - _this._player.radius > 0) {
                 _this._player.SetPositionX = _this._player.xPosition - movementSpeed;
+                _this._player.SetPosition = 0;
             }
             if (_this.keys[68] && _this._player.xPosition + _this._player.radius < innerWidth) {
                 _this._player.SetPositionX = _this._player.xPosition + movementSpeed;
+                _this._player.SetPosition = 1;
             }
             if (_this.keys[83] && _this._player.yPosition + _this._player.radius < innerHeight) {
                 _this._player.SetPositionY = _this._player.yPosition + movementSpeed;
+                _this._player.SetPosition = 1;
             }
             if (_this.keys[87] && _this._player.yPosition - _this._player.radius > 0) {
                 _this._player.SetPositionY = _this._player.yPosition - movementSpeed;
+                _this._player.SetPosition = 3;
             }
             _this.update();
         };
@@ -180,6 +209,7 @@ var Game = (function () {
         var spawnNumber = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
         var spawnKind = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
         var spawnTime = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
+        console.log(this._player.position);
         if (spawnNumber > 2) {
             if (spawnKind == 1) {
                 this._boosters.push(new Booster("health", 10, "#3CB371", xPos, yPos));
@@ -216,7 +246,7 @@ var Game = (function () {
         else {
             var score = this._score.getScore;
             this.context.textBaseline = "middle";
-            this.context.font = "30px 'Lato'";
+            this.context.font = "30px ' 'Kaushan Script";
             var img = new Image();
             img.src = "./assets/img/skeleton.png";
             this.context.drawImage(img, innerWidth / 2 - 35, innerHeight / 2 - 125);
@@ -325,5 +355,10 @@ var Scoreboard = (function () {
         this.context.fillText("Score: " + this._points, window.innerWidth - 175, 50);
     };
     return Scoreboard;
+}());
+var Shooter = (function () {
+    function Shooter() {
+    }
+    return Shooter;
 }());
 //# sourceMappingURL=main.js.map

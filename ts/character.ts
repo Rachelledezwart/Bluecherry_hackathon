@@ -2,7 +2,8 @@
 
 class Character extends GameItem {
     //attr
-    private _health: number; 
+    private _health: number;
+    public position: number; 
     
     /**
     * Function to create the Character
@@ -11,9 +12,10 @@ class Character extends GameItem {
     * @param {number} - xPosition
     * @param {number} - yPosition
     */
-    constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0) {
+    constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0, position: number = 0) {
         super(radius, colour, xPosition, yPosition);
         this._health = 1;
+        this.position = position;
     }
 
     /**
@@ -41,6 +43,14 @@ class Character extends GameItem {
     }
 
     /**
+    * Function to set the position
+    * @param {number} - position
+    */
+    public set SetPosition(position: number) {
+        this.position = position;
+    }
+
+    /**
     * Function to get the health
     */
     public get health() {
@@ -58,10 +68,22 @@ class Character extends GameItem {
         // this.context.stroke(); 
         // this.context.fill();
 
-        const img = new Image()
-        img.src = "./assets/img/wizard.png"
-        
-        this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        if (this.position == 0) { 
+            const img = new Image();
+            img.src = "./assets/img/wizard.png";
+            
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        } else if (this.position == 3) {
+            const img = new Image();
+            img.src = "./assets/img/wizard_3.png";
+            
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        } else {
+            const img = new Image();
+            img.src = "./assets/img/wizard_2.png";
+            
+            this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+        }
 
     }
 
