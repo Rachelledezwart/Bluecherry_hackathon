@@ -12,8 +12,8 @@
 
 #define silencePiezo() ledcWriteTone(PIEZO_CHANNEL, 0)
 #define dclear() display.clear()
-#define ddrawLogBuffer display.drawLogBuffer(0, 0)
-#define dblit display.display()
+#define ddrawLogBuffer() display.drawLogBuffer(0, 0)
+#define dblit() display.display()
 
 // Define MQTT constants
 #define MQTT_SERIAL_PUBLISH_CH "bluecherry/backstory"
