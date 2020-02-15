@@ -1,10 +1,12 @@
 const mqttClient = require('./mqqt-client');
 
 (async () => {
-    await mqttClient.setup();
-    await mqttClient.subscribe('presence');
-    await mqttClient.registerMessageListener('presence', msg => {console.log(msg);})
-    setTimeout(
-        () => {mqttClient.publish('presence', 'asdf')}, 1000
+    await mqttClient.setup('mqtt://192.168.1.29:1883');
+    await mqttClient.subscribe('hz/bluecherry/backstory');
+    await mqttClient.subscribe('hz/bluecherry/backstory-rec');
+    await mqttClient.registerMessageListener('hz/bluecherry/backstory', msg => {console.log(msg);})
+    setInterval(
+        () => {mqttClient.publish('hz/bluecherry/backstory-rec', 'asdf')}, 500
     )
+    await mqttClient.registerMessageListener('hz/bluecherry/backstory-rec', msg => {console.log(msg);})
 })();

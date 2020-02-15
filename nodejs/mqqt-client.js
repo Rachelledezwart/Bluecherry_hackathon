@@ -1,13 +1,13 @@
 const mqtt = require('mqtt');
 
-const client_url = 'mqtt://broker.hivemq.com:1883';
+const client_url = 'mqtt://127.0.0.1:1883';
 var client = null;
 
 var registeredListeners = {}
 
-async function setup() {
+async function setup(url = client_url) {
     await new Promise((resolve, reject) => {
-        client = mqtt.connect(client_url);
+        client = mqtt.connect(url);
         timeout = setTimeout(reject, 1000);
         client.on('connect', async function() {
             clearTimeout(timeout);
