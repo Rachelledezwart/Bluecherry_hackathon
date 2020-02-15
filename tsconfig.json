@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "sourceMap":  true,
+        "removeComments": true,
+        "noImplicitAny": true,
+        "noImplicitReturns": true,
+        "target":"es5",
+        "out": "js/main.js"
+    },
+    "include" : [
+        "ts/**/*"
+    ]
+}
