@@ -2,11 +2,17 @@
 #include <Wire.h>
 #include "SSD1306Wire.h"
 #include <WiFi.h>
+#include <PubSubClient.h>
 
 // Define piezobuzzer constants
 #define PIEZO_CHANNEL 0
 #define PIEZO_FREQUENCY 8
 #define PIEZO_PIN 27
+#define MQTT_SERIAL_PUBLISH_CH "bluecherry/backstory"
+#define MQTT_SERIAL_RECEIVER_CH "bluecherry/backstory-rec"
+#define MQTT_CLIENT_ID "deboiiiii"
+#define MQTT_SERVER "broker.hivemq.com"
+#define MQTT_PORT 1883
 
 // Wifi credentials
 const char* ssid     = "Schuur De Vier Ambachten";
@@ -18,6 +24,10 @@ const int httpPort = 80;
 
 // Inialiseren van display op adres 0x3c, SDA==25 en SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
+WiFiClient client;
+PubSubClient psclient(client);
+
+
 
 void setupPiezo() {
     ledcSetup(PIEZO_CHANNEL, 2000, PIEZO_FREQUENCY);
@@ -34,17 +44,59 @@ void pinBeeps() {
     }
 }
 
-void dprintln(char* line) {
+void dprintln(const char* line) {
+    display.clear();
     display.println(line);
     display.drawLogBuffer(0, 0);
     display.display();
 }
-
-void dprint(char* line) {
+void dprintln(char* line) {
+    display.clear();
+    display.println(line);
+    display.drawLogBuffer(0, 0);
+    display.display();
+}
+void dprint(const char* line) {
+    display.clear();
     display.print(line);
     display.drawLogBuffer(0, 0);
     display.display();
 }
+void dprint(char* line) {
+    display.clear();
+    display.print(line);
+    display.drawLogBuffer(0, 0);
+    display.display();
+}
+
+void callback(char* topic, byte *payload, unsigned int length) {
+  char recv[255]="";
+  for(int i=0; i<length; i++){
+    recv[i]=(char)payload[i];
+  }
+  dprintln(recv);
+}
+
+void reconnect() {
+  while(!psclient.connected()) {
+    dprint("Connecting MQTT...");
+    if(psclient.connect(MQTT_CLIENT_ID)){
+      dprintln("[OK]");
+      psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
+      psclient.subscribe(MQTT_SERIAL_RECEIVER_CH);
+    } else {
+      dprintln("[FAIL]");
+      delay(5000);
+    }
+  }
+}
+
+void psclientSetup(){
+  psclient.setServer(MQTT_SERVER,MQTT_PORT);
+  psclient.setCallback(callback);
+  reconnect();
+}
+
 
 void setup() {
     // Opzetten piezo
@@ -64,11 +116,10 @@ void setup() {
     // Buffer aanmaken voor tekst contents scherm
     display.setLogBuffer(5, 30);
 
-    dprintln("[OK]");
+    dprintln("Booting...");
     
     dprint("Connecting to WiFi");
-    dprintln(ssid);
-
+    
     WiFi.begin(ssid, password);
 
     // Print dots until connected
@@ -80,23 +131,29 @@ void setup() {
     dprintln("[OK]");
 
     // TCP Client
-    WiFiClient client;
+    
 
     // Path to connect to
     String url = "/";
-    // Connect to host on port
-    if (!client.connect(host, httpPort)) {
-        dprintln("Connection failed");
-        return;
-    }
-    // Send HTTP packet
-    client.print(String("GET ") + url + " HTTP/1.1\r\n" +
-                 "Host: " + host + "\r\n" +
-                 "Connection: close\r\n\r\n");
+    psclientSetup();
+   
     
-    pinBeeps();
+  
+                 
+    
+    //pinBeeps();
 }
 
 
 
-void loop() {}
+void loop() {
+  if(!psclient.connected()){
+    reconnect();
+  }
+  psclient.loop();
+
+  
+      psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
+      delay(500);
+  
+ }
