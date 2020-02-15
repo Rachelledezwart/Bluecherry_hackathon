@@ -64,9 +64,9 @@ void setup() {
     // Buffer aanmaken voor tekst contents scherm
     display.setLogBuffer(5, 30);
 
-    dprintln("[ok]");
+    dprintln("[OK]");
     
-    dprint("Connecting to ");
+    dprint("Connecting to WiFi");
     dprintln(ssid);
 
     WiFi.begin(ssid, password);
@@ -77,8 +77,7 @@ void setup() {
         dprint(".");
     }
 
-    dprintln("");
-    dprintln("WiFi connected");
+    dprintln("[OK]");
 
     // TCP Client
     WiFiClient client;
