@@ -16,10 +16,10 @@
 #define dblit() display.display()
 
 // Define MQTT constants
-#define MQTT_SERIAL_PUBLISH_CH "bluecherry/backstory"
-#define MQTT_SERIAL_RECEIVER_CH "bluecherry/backstory-rec"
+#define MQTT_SERIAL_PUBLISH_CH "hz/bluecherry/backstory"
+#define MQTT_SERIAL_RECEIVER_CH "hz/bluecherry/backstory-rec"
 #define MQTT_CLIENT_ID "deboiiiii"
-#define MQTT_SERVER "broker.hivemq.com"
+#define MQTT_SERVER "192.168.1.29"
 #define MQTT_PORT 1883
 
 // Wifi credentials
