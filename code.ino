@@ -1,6 +1,12 @@
+#include <Adafruit_GFX.h>
+#include <Adafruit_SPITFT.h>
+#include <Adafruit_SPITFT_Macros.h>
+#include <gfxfont.h>
+
 // Include libraries
 #include <Wire.h>
 #include "SSD1306Wire.h"
+#include <MPU6050_tockn.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
@@ -32,6 +38,7 @@ const int httpPort = 80;
 
 // Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
+MPU6050 mpu6050(Wire);
 
 // Initialize TCP client and PubSubClient for MQTT
 WiFiClient client;
@@ -129,6 +136,8 @@ void setup() {
 
     dprint("Connecting to WiFi");
 
+    mpu6050.begin();
+    mpu6050.calcGyroOffsets(true);
     WiFi.begin(ssid, password);
 
     // Print dots until connected
@@ -153,6 +162,13 @@ void loop() {
         reconnect();
     }
     psclient.loop();
-    psclient.publish(MQTT_SERIAL_PUBLISH_CH,"OwO");
+    mpu6050.update();
+    char buf[100];
+    String xcomp = String(mpu6050.getGyroX()).c_str();
+    String ycomp = String(mpu6050.getGyroY()).c_str();
+    strcpy(buf, xcomp.c_str());
+    strcat(buf, ",");
+    strcat(buf, ycomp.c_str());
+    psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
     delay(500);
 }
