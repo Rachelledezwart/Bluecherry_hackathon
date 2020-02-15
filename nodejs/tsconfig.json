@@ -1,0 +1,14 @@
+{
+    "compilerOptions": {
+        "noImplicitAny": true,
+        "removeComments": true,
+        "preserveConstEnums": true,
+        "sourceMap": true,
+        "module": "system",
+        "out": "js/main.js"
+    },
+    "files": [
+        "ts/mqtt.ts",
+        "ts/index.ts"
+    ]
+}
