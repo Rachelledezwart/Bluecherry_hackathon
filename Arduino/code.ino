@@ -147,9 +147,6 @@ void setup() {
     }
 
     dprintln("[OK]");
-
-    // Path to connect to
-    String url = "/";
     psclientSetup();
 
     //pinBeeps();
@@ -162,6 +159,7 @@ void loop() {
         reconnect();
     }
     psclient.loop();
+    display.println("BUP");
     mpu6050.update();
     char buf[100];
     String xcomp = String(mpu6050.getGyroX()).c_str();
