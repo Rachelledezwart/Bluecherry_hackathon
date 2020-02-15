@@ -1,8 +1,3 @@
-#include <Adafruit_GFX.h>
-#include <Adafruit_SPITFT.h>
-#include <Adafruit_SPITFT_Macros.h>
-#include <gfxfont.h>
-
 // Include libraries
 #include <Wire.h>
 #include "SSD1306Wire.h"
@@ -28,6 +23,10 @@
 #define MQTT_SERVER "192.168.1.29"
 #define MQTT_PORT 1883
 
+// Bitmap constants
+#define BITMAP_WIDTH 16
+#define BITMAP_HEIGHT 20
+
 // Wifi credentials
 const char* ssid     = "Schuur De Vier Ambachten";
 const char* password = "gratiswifi";
@@ -39,6 +38,87 @@ const int httpPort = 80;
 // Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
 MPU6050 mpu6050(Wire);
+
+// Letters
+static const unsigned char PROGMEM letter_s[] =
+{
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000
+};
+
+static const unsigned char PROGMEM letter_l[] =
+{
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000
+};
+
+static const unsigned char PROGMEM letter_colon[] =
+{
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000,
+    B00000000, B00000000
+};
+
+void drawBitmap(const unsigned char* bitmap) {
+    for (int y=0; y<BITMAP_HEIGHT; y++) {
+        for (int x=0; x<BITMAP_WIDTH/8; x++) {
+            ddrawPixel(x, y, 1);
+        }
+    }
+}
 
 // Initialize TCP client and PubSubClient for MQTT
 WiFiClient client;
@@ -83,6 +163,9 @@ void dprint(char* line) {
     display.print(line);
     ddrawLogBuffer();
     dblit();
+}
+void ddrawPixel(int x, int y, int color) {
+    display.drawPixel(x, y, color); // TODO: OK EVAN
 }
 
 void callback(char* topic, byte *payload, unsigned int length) {
@@ -150,6 +233,8 @@ void setup() {
     psclientSetup();
 
     //pinBeeps();
+
+    drawBitmap(letter_l);
 }
 
 
