@@ -1,18 +1,32 @@
-#define PIEZO_CHANNEL 0
-#define PIEZO_FREQUENCY 8
-#define PIEZO_PIN 27
+// Include libraries
 #include <Wire.h>
 #include "SSD1306Wire.h"
 #include <WiFi.h>
+
+// Define piezobuzzer constants
+#define PIEZO_CHANNEL 0
+#define PIEZO_FREQUENCY 8
+#define PIEZO_PIN 27
+
+// Wifi credentials
 const char* ssid     = "Schuur De Vier Ambachten";
 const char* password = "gratiswifi";
-const int httpPort = 80;
+
+// Traffic target
 const char* host = "192.168.1.29";
+const int httpPort = 80;
 
-SSD1306Wire display(0x3c,25,26);
+// Inialiseren van display op adres 0x3c, SDA==25 en SCL == 26
+SSD1306Wire display(0x3c, 25, 26);
 
-void pinautomaatboi(){
-  for (int i=0; i<3; i++) {
+void setupPiezo() {
+    ledcSetup(PIEZO_CHANNEL, 2000, PIEZO_FREQUENCY);
+    ledcAttachPin(PIEZO_PIN, 0);
+}
+
+void pinBeeps() {
+    // Beep drie maal
+    for (int i=0; i<3; i++) {
         ledcWriteTone(PIEZO_CHANNEL, 1000);
         delay(90);
         ledcWriteTone(PIEZO_CHANNEL, 0);
@@ -20,55 +34,70 @@ void pinautomaatboi(){
     }
 }
 
+void dprintln(char* line) {
+    display.println(line);
+    display.drawLogBuffer(0, 0);
+    display.display();
+}
+
+void dprint(char* line) {
+    display.print(line);
+    display.drawLogBuffer(0, 0);
+    display.display();
+}
+
 void setup() {
-    ledcSetup(PIEZO_CHANNEL, 2000, PIEZO_FREQUENCY);
-    ledcAttachPin(PIEZO_PIN, 0);
+    // Opzetten piezo
+    setupPiezo();
+
+    // Seriele connectie opzetten
     Serial.begin(9600);
+
+    // Init display
     display.init();
+    // Kleurcontrast - hoe fel staat het scherm
     display.setContrast(255);
+    // Clear
     display.clear();
+    // Goed om zetten
     display.flipScreenVertically();
+    // Buffer aanmaken voor tekst contents scherm
     display.setLogBuffer(5, 30);
-    display.println("[OK]");
-    display.drawLogBuffer(0, 0);
-    display.display();
+
+    dprintln("[ok]");
     
-    display.print("Connecting to ");
-    display.println(ssid);
-    display.drawLogBuffer(0, 0);
-    display.display();
+    dprint("Connecting to ");
+    dprintln(ssid);
 
     WiFi.begin(ssid, password);
 
+    // Print dots until connected
     while (WiFi.status() != WL_CONNECTED) {
         delay(500);
-        display.print(".");
-        display.drawLogBuffer(0, 0);
-    display.display();
+        dprint(".");
     }
 
-    display.println("");
-    display.println("WiFi connected");
-    display.drawLogBuffer(0, 0);
-    display.display();
-    //Serial.println("IP address: ");
-    //Serial.println(WiFi.localIP());
+    dprintln("");
+    dprintln("WiFi connected");
 
+    // TCP Client
     WiFiClient client;
+
+    // Path to connect to
     String url = "/";
+    // Connect to host on port
     if (!client.connect(host, httpPort)) {
-        Serial.println("connection failed");
+        dprintln("Connection failed");
         return;
     }
+    // Send HTTP packet
     client.print(String("GET ") + url + " HTTP/1.1\r\n" +
                  "Host: " + host + "\r\n" +
                  "Connection: close\r\n\r\n");
     
-    //pinautomaatboi();
+    pinBeeps();
 }
 
 
 
-void loop() {
-  
-  }
+void loop() {}
