@@ -20,6 +20,7 @@ void pinautomaatboi(){
     }
 }
 
+
 void setup() {
     ledcSetup(PIEZO_CHANNEL, 2000, PIEZO_FREQUENCY);
     ledcAttachPin(PIEZO_PIN, 0);
@@ -30,11 +31,9 @@ void setup() {
     display.flipScreenVertically();
     display.setLogBuffer(5, 30);
     display.println("[OK]");
-    display.drawLogBuffer(0, 0);
     display.display();
     
-    display.print("Connecting to ");
-    display.println(ssid);
+    display.print("Connecting to WiFi");
     display.drawLogBuffer(0, 0);
     display.display();
 
@@ -44,15 +43,12 @@ void setup() {
         delay(500);
         display.print(".");
         display.drawLogBuffer(0, 0);
-    display.display();
+        display.display();
     }
 
-    display.println("");
-    display.println("WiFi connected");
+    display.println("[OK]");
     display.drawLogBuffer(0, 0);
     display.display();
-    //Serial.println("IP address: ");
-    //Serial.println(WiFi.localIP());
 
     WiFiClient client;
     String url = "/";
