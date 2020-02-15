@@ -38,29 +38,31 @@ const int httpPort = 80;
 // Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
 MPU6050 mpu6050(Wire);
+int lives=12345;
+int score=67890;
 
 // Letters
 static const unsigned char PROGMEM letter_s[] =
 {
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00000011, B11000000,
+    B00001111, B11110000,
+    B00011100, B00111000,
+    B00111000, B00011000,
+    B00110000, B00000000,
+    B00110000, B00000000,
+    B00111000, B00000000,
+    B00011100, B00000000,
+    B00000111, B10000000,
+    B00000001, B11100000,
+    B00000000, B00111000,
+    B00000000, B00011100,
+    B00000000, B00001100,
+    B00000000, B00001100,
+    B00011000, B00011100,
+    B00011100, B00111000,
+    B00001111, B11110000,
+    B00000011, B11000000,
     B00000000, B00000000
 };
 
@@ -68,22 +70,22 @@ static const unsigned char PROGMEM letter_l[] =
 {
     B00000000, B00000000,
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011111, B11111000,
+    B00011111, B11111000,
     B00000000, B00000000,
     B00000000, B00000000
 };
@@ -93,6 +95,9 @@ static const unsigned char PROGMEM letter_colon[] =
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
@@ -101,23 +106,24 @@ static const unsigned char PROGMEM letter_colon[] =
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000
 };
 
-void drawBitmap(const unsigned char* bitmap) {
+void drawBitmap(const unsigned char* bitmap, int _x, int _y) {
     for (int y=0; y<BITMAP_HEIGHT; y++) {
         for (int x=0; x<BITMAP_WIDTH/8; x++) {
-            ddrawPixel(x, y, 1);
+          for(int b=0; b<8;b++){
+            if((bitmap[2*y+x]&(0x80>>b))>0)
+              display.setPixelColor(b+8*x+_x, y+15+_y, WHITE);
+          }
         }
     }
+    dblit();
 }
 
 // Initialize TCP client and PubSubClient for MQTT
@@ -164,9 +170,9 @@ void dprint(char* line) {
     ddrawLogBuffer();
     dblit();
 }
-void ddrawPixel(int x, int y, int color) {
-    display.drawPixel(x, y, color); // TODO: OK EVAN
-}
+/*void ddrawPixel(int x, int y, int color) {
+    display.setPixel(x, y, color); // TODO: OK EVAN
+}*/
 
 void callback(char* topic, byte *payload, unsigned int length) {
     char recv[255] = "";
@@ -234,7 +240,7 @@ void setup() {
 
     //pinBeeps();
 
-    drawBitmap(letter_l);
+    display.clear();
 }
 
 
@@ -244,7 +250,44 @@ void loop() {
         reconnect();
     }
     psclient.loop();
-    display.println("BUP");
+    drawBitmap(letter_l,0,0);
+    drawBitmap(letter_s,0,20);
+    drawBitmap(letter_colon,14,0);
+    drawBitmap(letter_colon,14,20);
+
+    String convLives = String(lives).c_str();
+    for(int i=0; i<convLives.length(); i++){
+      int index = String(convLives[i]).toInt();
+      switch(index){
+         case 0: drawBitmap(letter_s,28+16*i,0); break;
+         case 1: drawBitmap(letter_s,28+16*i,0); break;
+         case 2: drawBitmap(letter_s,28+16*i,0); break;
+         case 3: drawBitmap(letter_s,28+16*i,0); break;
+         case 4: drawBitmap(letter_s,28+16*i,0); break;
+         case 5: drawBitmap(letter_s,28+16*i,0); break;
+         case 6: drawBitmap(letter_s,28+16*i,0); break;
+         case 7: drawBitmap(letter_s,28+16*i,0); break;
+         case 8: drawBitmap(letter_s,28+16*i,0); break;
+         case 9: drawBitmap(letter_s,28+16*i,0); break;
+      }
+    }
+    String convScore = String(score).c_str();
+    for(int i=0; i<convScore.length(); i++){
+      int index2 = String(convScore[i]).toInt();
+      switch(index2){
+         case 0: drawBitmap(letter_l,28+16*i,20); break;
+         case 1: drawBitmap(letter_l,28+16*i,20); break;
+         case 2: drawBitmap(letter_l,28+16*i,20); break;
+         case 3: drawBitmap(letter_l,28+16*i,20); break;
+         case 4: drawBitmap(letter_l,28+16*i,20); break;
+         case 5: drawBitmap(letter_l,28+16*i,20); break;
+         case 6: drawBitmap(letter_l,28+16*i,20); break;
+         case 7: drawBitmap(letter_l,28+16*i,20); break;
+         case 8: drawBitmap(letter_l,28+16*i,20); break;
+         case 9: drawBitmap(letter_l,28+16*i,20); break;
+      }
+    }
+    
     mpu6050.update();
     char buf[100];
     String xcomp = String(mpu6050.getGyroX()).c_str();
@@ -252,6 +295,8 @@ void loop() {
     strcpy(buf, xcomp.c_str());
     strcat(buf, ",");
     strcat(buf, ycomp.c_str());
+    strcat(buf, ",");
+    strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed
     psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
-    delay(500);
+    delay(100);
 }
