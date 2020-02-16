@@ -87,6 +87,21 @@ class Game {
             y_speed = - current_y;
         }
 
+        // lrbu
+        let facing_directions: ArbitraryStringKeysWithNumbers = {
+            'l': 0, 
+            'r': 1, 
+            'b': 2, 
+            'u': 3
+        };
+        let directions: ArbitraryStringKeysWithNumbers = {
+            'l': -x_speed,
+            'r': x_speed,
+            'b': y_speed,
+            'u': -y_speed
+        }
+        this._player.SetPosition = facing_directions[Object.keys(directions).reduce(function(a: string, b: string){ return directions[a] > directions[b] ? a : b })];
+
         this._player.SetPositionX = current_x + x_speed;
         this._player.SetPositionY = current_y + y_speed;
 
@@ -303,4 +318,8 @@ class Game {
         this.position_y = yPos;
     }
 
+}
+
+interface ArbitraryStringKeysWithNumbers {
+    [key: string]: number
 }

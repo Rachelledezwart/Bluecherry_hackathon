@@ -23,31 +23,31 @@ interface Window {
 
     window.addEventListener('load', init);
     
-    await window.setupMqtt('ws://192.168.1.29:8000'); 
-    await window.subscribeMqtt('hz/bluecherry/backstory');
-    await window.subscribeMqtt('hz/bluecherry/backstory-rec');
-    await window.registerMessageListenerMqtt('hz/bluecherry/backstory', (msg: string) => {
-        // console.log(msg);
+    // await window.setupMqtt('ws://192.168.1.29:8000'); 
+    // await window.subscribeMqtt('hz/bluecherry/backstory');
+    // await window.subscribeMqtt('hz/bluecherry/backstory-rec');
+    // await window.registerMessageListenerMqtt('hz/bluecherry/backstory', (msg: string) => {
+    //     // console.log(msg);
 
-        const msgArr = msg.split(',');
-        // console.log(app.game);
+    //     const msgArr = msg.split(',');
+    //     // console.log(app.game);
 
-        app.game.position_y = msgArr[0];
-        app.game.position_x = msgArr[1]; 
-        app.game.shooting = msgArr[2]; 
-        console.log(app.game.shooting);
+    //     app.game.position_y = msgArr[0];
+    //     app.game.position_x = msgArr[1]; 
+    //     app.game.shooting = msgArr[2]; 
+    //     console.log(app.game.shooting);
 
-    });
+    // });
 
-    setInterval(() =>{ 
-        const score = lpad(app.game._score._points, 4, '0');
-        const health = lpad(app.game._player._health, 3, '0');
+    // setInterval(() =>{ 
+    //     const score = lpad(app.game._score._points, 4, '0');
+    //     const health = lpad(app.game._player._health, 3, '0');
 
-        const string = score + ',' + health;
+    //     const string = score + ',' + health;
 
-        window.publishMqtt('hz/bluecherry/backstory-rec', string);
+    //     window.publishMqtt('hz/bluecherry/backstory-rec', string);
         
-    }, 1000);
+    // }, 1000);
 })();
 
 function lpad(s: string, width: number, char:string) {
