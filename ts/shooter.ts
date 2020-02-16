@@ -38,6 +38,10 @@ class Shooter extends GameItem {
         this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
     }
 
+    public setDirection(): void {
+        
+    }
+
     /**
     * Function to update the state of the shooter in the DOM
     */    

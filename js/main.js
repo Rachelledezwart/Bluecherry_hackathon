@@ -409,11 +409,43 @@ var app = {};
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var init;
     return __generator(this, function (_a) {
-        init = function () {
-            app.game = new Game();
-        };
-        window.addEventListener('load', init);
-        return [2];
+        switch (_a.label) {
+            case 0:
+                init = function () {
+                    app.game = new Game();
+                };
+                window.addEventListener('load', init);
+                return [4, window.setupMqtt('ws://192.168.1.29:8000')];
+            case 1:
+                _a.sent();
+                return [4, window.subscribeMqtt('hz/bluecherry/backstory')];
+            case 2:
+                _a.sent();
+                return [4, window.subscribeMqtt('hz/bluecherry/backstory-rec')];
+            case 3:
+                _a.sent();
+                return [4, window.registerMessageListenerMqtt('hz/bluecherry/backstory', function (msg) {
+                        var msgArr = msg.split(',');
+                        if (msg === 'OwO') {
+                            location.reload();
+                        }
+                        else {
+                            app.game.position_y = msgArr[0];
+                            app.game.position_x = msgArr[1];
+                            app.game.shooting = msgArr[2];
+                            console.log(app.game.shooting);
+                        }
+                    })];
+            case 4:
+                _a.sent();
+                setInterval(function () {
+                    var score = lpad(app.game._score._points, 4, '0');
+                    var health = lpad(app.game._player._health, 3, '0');
+                    var string = score + ',' + health;
+                    window.publishMqtt('hz/bluecherry/backstory-rec', string);
+                }, 1000);
+                return [2];
+        }
     });
 }); })();
 function lpad(s, width, char) {
@@ -495,6 +527,8 @@ var Shooter = (function (_super) {
         var img = new Image();
         img.src = "./assets/img/fireball.png";
         this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+    };
+    Shooter.prototype.setDirection = function () {
     };
     Shooter.prototype.update = function () {
         if (this._xPos + this._radius > innerWidth || this._xPos - this._radius < 0) {
