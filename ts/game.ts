@@ -317,7 +317,6 @@ class Game {
         this.position_x = xPos;
         this.position_y = yPos;
     }
-
 }
 
 interface ArbitraryStringKeysWithNumbers {

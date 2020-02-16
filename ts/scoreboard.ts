@@ -16,8 +16,9 @@ class Scoreboard {
     * Function to set the score
     * @param {number} - yPosition
     */
-    public set setScore(points: number){
+    public set setScore(points: number) {
         this._points = points;
+        window.publishStats();
     }
 
     

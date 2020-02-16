@@ -271,5 +271,5 @@ void loop() {
     strcat(buf, ",");
     strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed
     psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
-    delay(100);
+    delay(50);
 }

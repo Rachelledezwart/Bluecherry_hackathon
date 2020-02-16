@@ -5,6 +5,7 @@ interface Window {
     subscribeMqtt: (channel: string) => Promise<Boolean>;
     publishMqtt: (channel: string, msg: string) => Promise<Boolean>;
     registerMessageListenerMqtt: (channel: string, cb: (msg: string) => void) => Promise<Boolean>;
+    publishStats: () => void;
 }
 
 /*
@@ -21,6 +22,7 @@ interface Window {
     };
 
     window.addEventListener('load', init);
+    window.publishStats = () => {};
 
     await window.setupMqtt('ws://192.168.1.29:8000');
     await window.subscribeMqtt('hz/bluecherry/backstory');
@@ -37,14 +39,18 @@ interface Window {
         }
     });
 
-    setInterval(() => {
+    let publishStats = () => {
         const score = lpad(app.game._score._points, 4, '0');
         const health = lpad(app.game._player._health, 3, '0');
 
         const string = score + ',' + health;
 
         window.publishMqtt('hz/bluecherry/backstory-rec', string);
+    }
+    window.publishStats = publishStats;
 
+    setInterval(() => {
+        publishStats();
     }, 1000);
 })();
 
