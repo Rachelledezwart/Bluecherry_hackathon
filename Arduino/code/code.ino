@@ -348,6 +348,7 @@ static const unsigned char PROGMEM number_9[] =
 
 // Music
 static const unsigned int PROGMEM music_death[] = { 658, 0, 621, 628, 0, 880, 0, 0, 880, 553, 0, 0, 588, 0, 0, 220, 0, 0, 184 };
+static const unsigned int PROGMEM music_lifeup[] = { 658, 782, 1316, 1045, 1177, 1575 };
 
 
 void drawBitmap(const unsigned char* bitmap, int _x, int _y) {
@@ -441,6 +442,14 @@ void callback(char* topic, byte *payload, unsigned int length) {
       }
     } else if (newLives > lives) {
       // Play gain life
+      size_t len = sizeof(music_lifeup)/sizeof(music_lifeup[0]);
+      
+      for (int i = 0; i < len; i++) {
+        ledcWriteTone(PIEZO_CHANNEL, music_lifeup[i]);
+        delay(60);
+        silencePiezo();
+        delay(60);
+      }
     } else if (newLives < lives) {
       // Play lose life
       for (int i = 0; i < 4; i++) {
@@ -453,8 +462,6 @@ void callback(char* topic, byte *payload, unsigned int length) {
 
     if (newScore > score) {
       // Play gain score
-    } else if (newScore < score) {
-      // Play lose score
     }
 
     lives = newLives;
