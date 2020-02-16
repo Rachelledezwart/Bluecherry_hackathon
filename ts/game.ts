@@ -85,7 +85,16 @@ class Game {
             y_speed = - current_y;
         }
 
-        console.log(typeof x_speed, typeof current_x, typeof boundary_x)
+        // lrbu
+        let facing_directions = [0, 1, 2, 3];
+        let directions: ArbitraryStringKeysWithNumbers = {
+            'l': -x_speed,
+            'r': x_speed,
+            'b': y_speed,
+            'u': -y_speed
+        }
+        Object.keys(directions).reduce(function(a: string, b: string){ return directions[a] > directions[b] ? a : b });
+        
 
         this._player.SetPositionX = current_x + x_speed;
         this._player.SetPositionY = current_y + y_speed;
@@ -239,4 +248,8 @@ class Game {
         this.position_y = yPos;
     }
 
+}
+
+interface ArbitraryStringKeysWithNumbers {
+    [key: string]: Number
 }
