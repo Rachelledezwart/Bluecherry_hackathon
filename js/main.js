@@ -220,8 +220,8 @@ var Game = (function () {
                 'u': 3
             };
             var directions = {
+                'r': x_speed + 1,
                 'l': -x_speed,
-                'r': x_speed,
                 'b': y_speed,
                 'u': -y_speed
             };
@@ -233,24 +233,29 @@ var Game = (function () {
                 var playerY = _this._player._yPos;
                 var rotationX = 0;
                 var rotationY = 0;
+                var imageRotation = './assets/img/fireball_left.png';
                 if (_this._player.position === 2) {
                     rotationY = 10;
                     rotationX = 0;
+                    imageRotation = './assets/img/fireball_bottom.png';
                 }
                 else if (_this._player.position === 1) {
                     rotationY = 0;
                     rotationX = 10;
+                    imageRotation = './assets/img/fireball_right.png';
                 }
                 else if (_this._player.position === 3) {
                     rotationY = -10;
                     rotationX = 0;
+                    imageRotation = './assets/img/fireball_top.png';
                 }
                 else {
                     rotationY = 0;
                     rotationX = -10;
+                    imageRotation = './assets/img/fireball_left.png';
                 }
                 if (_this._player.ability_1 === 0) {
-                    _this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX, rotationY));
+                    _this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX, rotationY, imageRotation));
                     _this._player.ability_1 += 500;
                 }
             }
@@ -409,43 +414,11 @@ var app = {};
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var init;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                init = function () {
-                    app.game = new Game();
-                };
-                window.addEventListener('load', init);
-                return [4, window.setupMqtt('ws://192.168.1.29:8000')];
-            case 1:
-                _a.sent();
-                return [4, window.subscribeMqtt('hz/bluecherry/backstory')];
-            case 2:
-                _a.sent();
-                return [4, window.subscribeMqtt('hz/bluecherry/backstory-rec')];
-            case 3:
-                _a.sent();
-                return [4, window.registerMessageListenerMqtt('hz/bluecherry/backstory', function (msg) {
-                        var msgArr = msg.split(',');
-                        if (msg === 'OwO') {
-                            location.reload();
-                        }
-                        else {
-                            app.game.position_y = msgArr[0];
-                            app.game.position_x = msgArr[1];
-                            app.game.shooting = msgArr[2];
-                            console.log(app.game.shooting);
-                        }
-                    })];
-            case 4:
-                _a.sent();
-                setInterval(function () {
-                    var score = lpad(app.game._score._points, 4, '0');
-                    var health = lpad(app.game._player._health, 3, '0');
-                    var string = score + ',' + health;
-                    window.publishMqtt('hz/bluecherry/backstory-rec', string);
-                }, 1000);
-                return [2];
-        }
+        init = function () {
+            app.game = new Game();
+        };
+        window.addEventListener('load', init);
+        return [2];
     });
 }); })();
 function lpad(s, width, char) {
@@ -513,11 +486,12 @@ var Scoreboard = (function () {
 }());
 var Shooter = (function (_super) {
     __extends(Shooter, _super);
-    function Shooter(radius, colour, xPosition, yPosition, xVelocity, yVelocity) {
+    function Shooter(radius, colour, xPosition, yPosition, xVelocity, yVelocity, img) {
         if (radius === void 0) { radius = 10; }
         if (xPosition === void 0) { xPosition = 0; }
         if (yPosition === void 0) { yPosition = 0; }
         var _this = _super.call(this, radius, colour, xPosition, yPosition) || this;
+        _this.img = img;
         _this._xVel = xVelocity;
         _this._yVel = yVelocity;
         _this._life = 1;
@@ -525,7 +499,7 @@ var Shooter = (function (_super) {
     }
     Shooter.prototype.draw = function () {
         var img = new Image();
-        img.src = "./assets/img/fireball.png";
+        img.src = this.img;
         this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
     };
     Shooter.prototype.setDirection = function () {

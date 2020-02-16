@@ -95,12 +95,13 @@ class Game {
             'u': 3
         };
         let directions: ArbitraryStringKeysWithNumbers = {
+            'r': x_speed + 1,
             'l': -x_speed,
-            'r': x_speed,
             'b': y_speed,
             'u': -y_speed
         }
         this._player.SetPosition = facing_directions[Object.keys(directions).reduce(function(a: string, b: string){ return directions[a] > directions[b] ? a : b })];
+
 
         this._player.SetPositionX = current_x + x_speed;
         this._player.SetPositionY = current_y + y_speed;
@@ -113,23 +114,28 @@ class Game {
 
             let rotationX = 0;
             let rotationY = 0; 
+            let imageRotation = './assets/img/fireball_left.png'; 
 
             if (this._player.position === 2) {
                 rotationY = 10;
                 rotationX = 0;
+                imageRotation = './assets/img/fireball_bottom.png';
             } else if (this._player.position === 1 ) {
                 rotationY = 0; 
                 rotationX = 10
+                imageRotation = './assets/img/fireball_right.png'; 
             } else if (this._player.position === 3) {
                 rotationY = -10;
-                rotationX = 0;
+                rotationX = 0; 
+                imageRotation = './assets/img/fireball_top.png'; 
             } else {
                 rotationY = 0; 
                 rotationX = -10;
+                imageRotation = './assets/img/fireball_left.png'; 
             }
 
             if (this._player.ability_1 === 0) {
-                this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX , rotationY));
+                this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX , rotationY, imageRotation));
                 this._player.ability_1 += 500;
             }
             
