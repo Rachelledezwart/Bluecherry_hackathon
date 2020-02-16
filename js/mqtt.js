@@ -1,0 +1,49 @@
+const client_url = 'mqtt://127.0.0.1:1883';
+var client = null;
+
+var registeredListeners = {}
+
+async function setup(url = client_url) {
+    await new Promise((resolve, reject) => {
+        client = mqtt.connect(url);
+        timeout = setTimeout(reject, 5000);
+        client.on('connect', async function() {
+            clearTimeout(timeout);
+
+            client.on('message', function (topic, message) {
+                // message is Buffer
+                msg_str = message.toString();
+                registeredListeners[topic].forEach(e => {
+                    e(msg_str);
+                })
+            })
+            resolve();
+        });
+    });
+}
+
+async function subscribe(channel) {
+    await new Promise((resolve, reject) => {
+        client.subscribe(channel, err => {
+            if (!err) {
+                registeredListeners[channel] = []
+                resolve();
+            } else {
+                reject();
+            }
+        })
+    });
+}
+
+async function publish(channel, message) {
+    client.publish(channel, message)
+}
+
+async function registerMessageListener(channel, cb) {
+    registeredListeners[channel].push(cb);
+}
+
+window.setupMqtt = setup;
+window.subscribeMqtt = subscribe;
+window.publishMqtt = publish;
+window.registerMessageListenerMqtt = registerMessageListener;

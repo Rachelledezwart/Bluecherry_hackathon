@@ -14,7 +14,7 @@ class Character extends GameItem {
     */
     constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0, position: number = 0) {
         super(radius, colour, xPosition, yPosition);
-        this._health = 1;
+        this._health = 3;
         this.position = position;
     }
 

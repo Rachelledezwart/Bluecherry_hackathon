@@ -3,9 +3,12 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "build": "tsc --watch"
   },
   "dependencies": {
-    "mqtt": "^3.0.0"
-  }
+    "mqtt": "^3.0.0",
+    "typescript": "^3.7.5"
+  },
+  "devDependencies": {}
 }
