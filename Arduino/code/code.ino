@@ -1,6 +1,7 @@
 // Include libraries
 #include <Wire.h>
 #include <MPU6050_tockn.h>
+#include <BH1750.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
@@ -98,7 +99,7 @@ void callback(char* topic, byte *payload, unsigned int length) {
       
       if (newLives == 0 && lives > 0) {
         // Play dead
-        delay(100);
+        delay(1000);
         lose();
       }
     }
