@@ -1,9 +1,11 @@
 // Include libraries
 #include <Wire.h>
-#include "SSD1306Wire.h"
 #include <MPU6050_tockn.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
+
+#include "bitmaps.h"
+#include "display.h"
 
 // Define piezobuzzer constants
 #define PIEZO_CHANNEL 0
@@ -12,9 +14,6 @@
 #define PIEZO_PIN 27
 
 #define silencePiezo() ledcWriteTone(PIEZO_CHANNEL, 0)
-#define dclear() display.clear()
-#define ddrawLogBuffer() display.drawLogBuffer(0, 0)
-#define dblit() display.display()
 
 // Define MQTT constants
 #define MQTT_SERIAL_PUBLISH_CH "hz/bluecherry/backstory"
@@ -22,10 +21,6 @@
 #define MQTT_CLIENT_ID "deboiiiii"
 #define MQTT_SERVER "192.168.1.29"
 #define MQTT_PORT 1883
-
-// Bitmap constants
-#define BITMAP_WIDTH 16
-#define BITMAP_HEIGHT 20
 
 // Wifi credentials
 const char* ssid     = "Schuur De Vier Ambachten";
@@ -35,333 +30,13 @@ const char* password = "gratiswifi";
 const char* host = "192.168.1.29";
 const int httpPort = 80;
 
-// Initialize display on address 0x3c, SDA==25 and SCL == 26
-SSD1306Wire display(0x3c, 25, 26);
 MPU6050 mpu6050(Wire);
 int lives=0;
 int score=0;
 
-// Letters
-static const unsigned char PROGMEM letter_s[] =
-{
-    B00000000, B00000000,
-    B00000011, B11000000,
-    B00001111, B11110000,
-    B00011100, B00111000,
-    B00111000, B00011000,
-    B00110000, B00000000,
-    B00110000, B00000000,
-    B00111000, B00000000,
-    B00011100, B00000000,
-    B00000111, B10000000,
-    B00000001, B11100000,
-    B00000000, B00111000,
-    B00000000, B00011100,
-    B00000000, B00001100,
-    B00000000, B00001100,
-    B00011000, B00011100,
-    B00011100, B00111000,
-    B00001111, B11110000,
-    B00000011, B11000000,
-    B00000000, B00000000
-};
-
-static const unsigned char PROGMEM letter_l[] =
-{
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011000, B00000000,
-    B00011111, B11111000,
-    B00011111, B11111000,
-    B00000000, B00000000,
-    B00000000, B00000000
-};
-
-static const unsigned char PROGMEM letter_colon[] =
-{
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000011, B10000000,
-    B00000011, B10000000,
-    B00000011, B10000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000011, B10000000,
-    B00000011, B10000000,
-    B00000011, B10000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000
-};
-
-// Numbers
-static const unsigned char PROGMEM number_0[] =
-{
-  0x1f, 0xf8,
-  0x10, 0x08,
-  0x72, 0x4e,
-  0xc0, 0x03,
-  0x87, 0xe1,
-  0xac, 0x35,
-  0x88, 0x11,
-  0x88, 0x11,
-  0xa8, 0x15,
-  0x88, 0x11,
-  0x88, 0x11,
-  0xa8, 0x15,
-  0x88, 0x11,
-  0x88, 0x11,
-  0xac, 0x35,
-  0x87, 0xe1,
-  0xc0, 0x03,
-  0x72, 0x4e,
-  0x10, 0x08,
-  0x1f, 0xf8
-};
-static const unsigned char PROGMEM number_1[] =
-{
-  0x0f, 0xf8,
-  0x10, 0x08,
-  0x24, 0x88,
-  0x40, 0x08,
-  0x93, 0x08,
-  0x45, 0x48,
-  0x29, 0x08,
-  0x11, 0x08,
-  0x01, 0x48,
-  0x01, 0x08,
-  0x01, 0x08,
-  0x01, 0x48,
-  0x01, 0x08,
-  0x01, 0x08,
-  0x01, 0x48,
-  0x1f, 0x0f,
-  0x10, 0x01,
-  0x12, 0x49,
-  0x10, 0x01,
-  0x1f, 0xff
-};
-static const unsigned char PROGMEM number_2[] =
-{
-  0x0f, 0xe0,
-  0x10, 0x10,
-  0x21, 0x08,
-  0x50, 0x04,
-  0x83, 0xa2,
-  0x44, 0x81,
-  0x29, 0x81,
-  0x12, 0x09,
-  0x04, 0x01,
-  0x08, 0x41,
-  0x10, 0x06,
-  0x22, 0x18,
-  0x40, 0x60,
-  0x80, 0x80,
-  0x89, 0x00,
-  0x83, 0xff,
-  0x80, 0x01,
-  0x88, 0x89,
-  0x80, 0x01,
-  0xff, 0xff
-};
-static const unsigned char PROGMEM number_3[] =
-{
-  0x1f, 0xe0,
-  0x20, 0x10,
-  0x49, 0x08,
-  0x80, 0x24,
-  0xa3, 0x82,
-  0x84, 0x49,
-  0x88, 0x21,
-  0xf0, 0x41,
-  0x00, 0x92,
-  0x01, 0x04,
-  0x01, 0x48,
-  0x01, 0x04,
-  0xf8, 0x92,
-  0x88, 0x41,
-  0xa8, 0x25,
-  0x84, 0x41,
-  0x83, 0x92,
-  0x48, 0x04,
-  0x30, 0x08,
-  0x1f, 0xf0
-};
-static const unsigned char PROGMEM number_4[] =
-{
-  0xfc, 0x3f,
-  0x84, 0x21,
-  0xa4, 0x25,
-  0x84, 0x21,
-  0x84, 0x21,
-  0x84, 0x21,
-  0xa7, 0xe5,
-  0x80, 0x01,
-  0x80, 0x01,
-  0xa2, 0x21,
-  0x80, 0x01,
-  0xff, 0xe1,
-  0x00, 0x25,
-  0x00, 0x21,
-  0x00, 0x21,
-  0x00, 0x21,
-  0x00, 0x21,
-  0x00, 0x25,
-  0x00, 0x21,
-  0x00, 0x3f
-};
-static const unsigned char PROGMEM number_5[] =
-{
-  0xff, 0xff,
-  0x80, 0x01,
-  0x88, 0x89,
-  0x80, 0x01,
-  0x87, 0xff,
-  0xa4, 0x00,
-  0x87, 0xf0,
-  0x80, 0x08,
-  0x82, 0x04,
-  0x80, 0x12,
-  0xff, 0xc1,
-  0x00, 0x21,
-  0x00, 0x15,
-  0xf8, 0x11,
-  0x88, 0x21,
-  0x87, 0xc5,
-  0x90, 0x01,
-  0x81, 0x11,
-  0x40, 0x02,
-  0x3f, 0xfc
-};
-static const unsigned char PROGMEM number_6[] =
-{
-  0x1f, 0xf8,
-  0x20, 0x04,
-  0x44, 0x42,
-  0x80, 0x09,
-  0x87, 0xe1,
-  0x88, 0x11,
-  0xa8, 0x0f,
-  0x88, 0x00,
-  0x8b, 0xf0,
-  0xac, 0x08,
-  0x89, 0x24,
-  0x80, 0x02,
-  0xa1, 0xc1,
-  0x82, 0x29,
-  0x82, 0x21,
-  0x91, 0xc1,
-  0x80, 0x09,
-  0x44, 0x42,
-  0x20, 0x04,
-  0x1f, 0xf8
-};
-static const unsigned char PROGMEM number_7[] =
-{
-  0xff, 0xff,
-  0x80, 0x01,
-  0x91, 0x09,
-  0x80, 0x01,
-  0x80, 0x01,
-  0xff, 0xe1,
-  0x00, 0x25,
-  0x00, 0x41,
-  0x00, 0x81,
-  0x01, 0x12,
-  0x02, 0x04,
-  0x04, 0x88,
-  0x08, 0x10,
-  0x10, 0x20,
-  0x24, 0x40,
-  0x40, 0x80,
-  0x41, 0x00,
-  0x4a, 0x00,
-  0x42, 0x00,
-  0x7e, 0x00
-};
-static const unsigned char PROGMEM number_8[] =
-{
-  0x1f, 0xf8,
-  0x20, 0x04,
-  0x42, 0x22,
-  0x80, 0x01,
-  0x93, 0xc5,
-  0x84, 0x21,
-  0x84, 0x21,
-  0xa4, 0x25,
-  0x83, 0xc1,
-  0x40, 0x02,
-  0x28, 0x94,
-  0x20, 0x04,
-  0x40, 0x02,
-  0x93, 0xc9,
-  0x84, 0x21,
-  0x84, 0x21,
-  0x93, 0xc9,
-  0x40, 0x02,
-  0x20, 0x04,
-  0x1f, 0xf8
-};
-static const unsigned char PROGMEM number_9[] =
-{
-  0x1f, 0xf8,
-  0x20, 0x04,
-  0x42, 0x22,
-  0x80, 0x01,
-  0x97, 0xe1,
-  0x84, 0x21,
-  0x84, 0x25,
-  0x97, 0xe1,
-  0x80, 0x01,
-  0x81, 0x09,
-  0x40, 0x01,
-  0x3f, 0xf1,
-  0x00, 0x11,
-  0xf8, 0x15,
-  0x84, 0x21,
-  0x93, 0xc1,
-  0x40, 0x12,
-  0x24, 0x84,
-  0x10, 0x08,
-  0x0f, 0xf0
-};
-
 // Music
-static const unsigned int PROGMEM music_death[] = { 658, 0, 621, 628, 0, 880, 0, 0, 880, 553, 0, 0, 588, 0, 0, 220, 0, 0, 184 };
+static const unsigned int PROGMEM music_death[] = { 658, 0, 621, 658, 0, 880, 0, 0, 880, 553, 0, 0, 588, 0, 0, 220, 0, 0, 184 };
 static const unsigned int PROGMEM music_lifeup[] = { 658, 782, 1316, 1045, 1177, 1575 };
-
-
-void drawBitmap(const unsigned char* bitmap, int _x, int _y) {
-    for (int y=0; y<BITMAP_HEIGHT; y++) {
-        for (int x=0; x<BITMAP_WIDTH/8; x++) {
-          for(int b=0; b<8;b++){
-            if((bitmap[2*y+x]&(0x80>>b))>0)
-              display.setPixelColor(b+8*x+_x, y+15+_y, WHITE);
-          }
-        }
-    }
-    dblit();
-}
 
 // Initialize TCP client and PubSubClient for MQTT
 WiFiClient client;
@@ -383,32 +58,8 @@ void pinBeeps() {
     }
 }
 
-void dprintln(const char* line) {
-    dclear();
-    display.println(line);
-    ddrawLogBuffer();
-    dblit();
-}
-void dprintln(char* line) {
-    dclear();
-    display.println(line);
-    ddrawLogBuffer();
-    dblit();
-}
-void dprint(const char* line) {
-    dclear();
-    display.print(line);
-    ddrawLogBuffer();
-    dblit();
-}
-void dprint(char* line) {
-    dclear();
-    display.print(line);
-    ddrawLogBuffer();
-    dblit();
-}
 /*void ddrawPixel(int x, int y, int color) {
-    display.setPixel(x, y, color); // TODO: OK EVAN
+    dsetPixel(x, y, color); // TODO: OK EVAN
 }*/
 
 void callback(char* topic, byte *payload, unsigned int length) {
@@ -426,21 +77,7 @@ void callback(char* topic, byte *payload, unsigned int length) {
     int newLives = String(rLives).toInt();
     int newScore = String(rScore).toInt();
 
-    if (newLives == 0 && lives > 0) {
-      // Play dead
-      size_t len = sizeof(music_death)/sizeof(music_death[0]);
-      
-      for (int i = 0; i < len; i++) {
-        if (music_death[i] == 0) {
-          delay(100);
-          continue;
-        }
-        ledcWriteTone(PIEZO_CHANNEL, music_death[i]);
-        delay(50);
-        silencePiezo();
-        delay(50);
-      }
-    } else if (newLives > lives) {
+    if (newLives > lives) {
       // Play gain life
       size_t len = sizeof(music_lifeup)/sizeof(music_lifeup[0]);
       
@@ -457,6 +94,12 @@ void callback(char* topic, byte *payload, unsigned int length) {
         delay(15);
         silencePiezo();
         delay(15);
+      }
+      
+      if (newLives == 0 && lives > 0) {
+        // Play dead
+        delay(100);
+        lose();
       }
     }
 
@@ -498,24 +141,54 @@ void psclientSetup(){
     reconnect();
 }
 
+void lose() {
+  dclear();
+  dprint("               S ");
+  for (int i = String(score).length(); i < 4; i++)
+    dprint("0");
+  dprintln(String(score).c_str());
+  for (int i = 0; i < 4; i++)
+    dprintln("");
+  drawBitmap(image_death, 0, 0, 128, 44);
+  
+  size_t len = sizeof(music_death)/sizeof(music_death[0]);
+  
+  for (int i = 0; i < len; i++) {
+    if (music_death[i] == 0) {
+      delay(100);
+      continue;
+    }
+    ledcWriteTone(PIEZO_CHANNEL, music_death[i]);
+    delay(50);
+    silencePiezo();
+    delay(50);
+  }
+  while(digitalRead(0)) {
+    if(!psclient.connected()){
+      reconnect();
+    }
+    delay(100);
+  }
+  psclient.publish(MQTT_SERIAL_PUBLISH_CH, "OwO");
+}
 
 void setup() {
-    // Opzetten piezo
+    // Init piezo
     setupPiezo();
 
-    // Seriele connectie opzetten
+    // Init serial connection
     Serial.begin(9600);
 
     // Init display
-    display.init();
-    // Kleurcontrast - hoe fel staat het scherm
-    display.setContrast(255);
+    dinit();
+    // Contrast - how bright the screen ought to be
+    dsetContrast(255);
     // Clear
-    display.clear();
-    // Goed om zetten
-    display.flipScreenVertically();
-    // Buffer aanmaken voor tekst contents scherm
-    display.setLogBuffer(5, 30);
+    dclear();
+    // Good to set, makes life easier
+    dflipScreenVertically();
+    // Create buffer for saving screen contents
+    dsetLogBuffer(5, 30);
 
     dprintln("Booting...");
 
@@ -536,7 +209,7 @@ void setup() {
 
     //pinBeeps();
 
-    display.clear();
+    dclear();
 }
 
 
