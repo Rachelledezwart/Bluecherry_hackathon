@@ -480,10 +480,7 @@ void callback(char* topic, byte *payload, unsigned int length) {
     int newLives = String(rLives).toInt();
     int newScore = String(rScore).toInt();
 
-    if (newLives == 0 && lives > 0) {
-      // Play dead
-      lose();
-    } else if (newLives > lives) {
+    if (newLives > lives) {
       // Play gain life
       size_t len = sizeof(music_lifeup)/sizeof(music_lifeup[0]);
       
@@ -500,6 +497,12 @@ void callback(char* topic, byte *payload, unsigned int length) {
         delay(15);
         silencePiezo();
         delay(15);
+      }
+      
+      if (newLives == 0 && lives > 0) {
+        // Play dead
+        delay(100);
+        lose();
       }
     }
 
