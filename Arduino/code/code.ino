@@ -38,8 +38,8 @@ const int httpPort = 80;
 // Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
 MPU6050 mpu6050(Wire);
-int lives=12345;
-int score=67890;
+int lives=0;
+int score=0;
 
 // Letters
 static const unsigned char PROGMEM letter_s[] =
@@ -346,6 +346,8 @@ static const unsigned char PROGMEM number_9[] =
   0x0f, 0xf0
 };
 
+// Music
+static const unsigned int PROGMEM music_death[] = { 658, 0, 621, 628, 0, 880, 0, 0, 880, 553, 0, 0, 588, 0, 0, 220, 0, 0, 184 };
 
 
 void drawBitmap(const unsigned char* bitmap, int _x, int _y) {
@@ -410,18 +412,55 @@ void dprint(char* line) {
 
 void callback(char* topic, byte *payload, unsigned int length) {
     if (length != 8) return;
-    char rScore[4] = "";
-    char rLives[3] = "";
+    char rScore[5] = "";
+    char rLives[4] = "";
     for(int i = 0; i < 4; i++){
         rScore[i] = (char)payload[i];
     }
     for(int i = 0; i < 3; i++){
         rLives[i]= (char)payload[i+5];
     }
-    lives = String(rLives).toInt();
-    score = String(rScore).toInt();
+    rScore[4] = 0x00;
+    rLives[3] = 0x00;
+    int newLives = String(rLives).toInt();
+    int newScore = String(rScore).toInt();
 
+    if (newLives == 0 && lives > 0) {
+      // Play dead
+      size_t len = sizeof(music_death)/sizeof(music_death[0]);
+      
+      for (int i = 0; i < len; i++) {
+        if (music_death[i] == 0) {
+          delay(100);
+          continue;
+        }
+        ledcWriteTone(PIEZO_CHANNEL, music_death[i]);
+        delay(50);
+        silencePiezo();
+        delay(50);
+      }
+    } else if (newLives > lives) {
+      // Play gain life
+    } else if (newLives < lives) {
+      // Play lose life
+      for (int i = 0; i < 4; i++) {
+        ledcWriteTone(PIEZO_CHANNEL, 867);
+        delay(15);
+        silencePiezo();
+        delay(15);
+      }
+    }
+
+    if (newScore > score) {
+      // Play gain score
+    } else if (newScore < score) {
+      // Play lose score
+    }
+
+    lives = newLives;
+    score = newScore;
     
+    dclear();
 }
 
 void reconnect() {
