@@ -224,7 +224,6 @@ void setup() {
 
 
 void loop() {
-  lose();
     int char_offset_x = 2;
     int char_offset_y = 2;
   

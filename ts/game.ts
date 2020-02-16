@@ -65,8 +65,8 @@ class Game {
         this.position_y = parseInt(this.position_y.toString());
         
         // Check for inputs
-        let x_speed = this.keys[68] ? movementSpeed : (this.keys[65] ? -movementSpeed : (Math.abs(this.position_x) > 10 ? -this.position_x/7 : 0));
-        let y_speed = this.keys[83] ? movementSpeed : (this.keys[87] ? -movementSpeed : (Math.abs(this.position_y) > 10 ? -this.position_y/7 : 0));
+        let x_speed = this.keys[68] ? movementSpeed : (this.keys[65] ? -movementSpeed : (Math.abs(this.position_x) > 5 ? -this.position_x/7 : 0));
+        let y_speed = this.keys[83] ? movementSpeed : (this.keys[87] ? -movementSpeed : (Math.abs(this.position_y) > 5 ? -this.position_y/7 : 0));
 
         let current_x = this._player.xPosition;
         let current_y = this._player.yPosition;
