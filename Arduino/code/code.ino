@@ -462,6 +462,14 @@ void callback(char* topic, byte *payload, unsigned int length) {
 
     if (newScore > score) {
       // Play gain score
+      ledcWriteTone(PIEZO_CHANNEL, 867);
+      delay(50);
+      silencePiezo();
+      delay(15);
+      
+      ledcWriteTone(PIEZO_CHANNEL, 1575);
+      delay(50);
+      silencePiezo();
     }
 
     lives = newLives;
