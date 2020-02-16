@@ -48,9 +48,6 @@ interface Window {
         window.publishMqtt('hz/bluecherry/backstory-rec', string);
         
     }, 1000);
-    // await window.registerMessageListenerMqtt('hz/bluecherry/backstory-rec', (msg: string) => {
-    
-    // });
 })();
 
 function lpad(s: string, width: number, char:string) {

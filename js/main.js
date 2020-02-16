@@ -52,6 +52,7 @@ class Character extends GameItem {
         super(radius, colour, xPosition, yPosition);
         this._health = 3;
         this.position = position;
+        this.ability_1 = 0;
     }
     set SetPositionX(xPos) {
         this._xPos = xPos;
@@ -119,9 +120,47 @@ class Game {
             if (current_y + y_speed < 0) {
                 y_speed = -current_y;
             }
-            console.log(typeof x_speed, typeof current_x, typeof boundary_x);
+            let facing_directions = {
+                'l': 0,
+                'r': 1,
+                'b': 2,
+                'u': 3
+            };
+            let directions = {
+                'l': -x_speed,
+                'r': x_speed,
+                'b': y_speed,
+                'u': -y_speed
+            };
+            this._player.SetPosition = facing_directions[Object.keys(directions).reduce(function (a, b) { return directions[a] > directions[b] ? a : b; })];
             this._player.SetPositionX = current_x + x_speed;
             this._player.SetPositionY = current_y + y_speed;
+            if (this.shooting === 1 || this.keys[32]) {
+                const playerX = this._player._xPos;
+                const playerY = this._player._yPos;
+                let rotationX = 0;
+                let rotationY = 0;
+                if (this._player.position === 2) {
+                    rotationY = 10;
+                    rotationX = 0;
+                }
+                else if (this._player.position === 1) {
+                    rotationY = 0;
+                    rotationX = 10;
+                }
+                else if (this._player.position === 3) {
+                    rotationY = -10;
+                    rotationX = 0;
+                }
+                else {
+                    rotationY = 0;
+                    rotationX = -10;
+                }
+                if (this._player.ability_1 === 0) {
+                    this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX, rotationY));
+                    this._player.ability_1 += 500;
+                }
+            }
             this.update();
         };
         let playerRadius = 20;
@@ -130,6 +169,7 @@ class Game {
         this.shooting = 0;
         this._projectiles = new Array();
         this._boosters = new Array();
+        this._shooters = new Array();
         this._player = new Character(playerRadius, "#912F40", window.innerWidth / 2 - playerRadius / 2, window.innerHeight / 2 - playerRadius / 2);
         this._score = new Scoreboard(0);
         window.addEventListener('keydown', (e) => {
@@ -161,7 +201,6 @@ class Game {
         let spawnNumber = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
         let spawnKind = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
         let spawnTime = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
-        console.log(this._player.position);
         if (spawnNumber > 2) {
             if (spawnKind == 1) {
                 this._boosters.push(new Booster("health", 10, "#3CB371", xPos, yPos));
@@ -186,14 +225,22 @@ class Game {
                 projectile.draw();
                 projectile.update();
             });
+            this._shooters.map((shooters) => {
+                shooters.draw();
+                shooters.update();
+            });
             this._boosters.map((booster) => {
                 booster.draw();
             });
             this.CheckCollisionProjectile();
             this.CheckCollisionBooster();
+            this.CheckCollisionShooter();
             this._player.drawHealth();
             this._player.draw();
             this._score.draw();
+            if (this._player.ability_1 > 0) {
+                this._player.ability_1 = this._player.ability_1 - 10;
+            }
         }
         else {
             let score = this._score.getScore;
@@ -213,6 +260,23 @@ class Game {
                 console.log("Collision");
                 this._projectiles.splice(index, 1);
                 this._player.SetHealth = this._player.health - 1;
+            }
+        });
+    }
+    CheckCollisionShooter() {
+        this._shooters.map((shooter, index) => {
+            console.log(shooter);
+            if (shooter._life === 0) {
+                this._shooters.splice(index, 1);
+            }
+            for (let ind = 0; ind < this._projectiles.length; ind++) {
+                const projectile = this._projectiles[ind];
+                let distance = this.Distance(shooter.xPosition, shooter.yPosition, projectile);
+                if (distance < projectile.radius + projectile.radius) {
+                    console.log("Collision");
+                    this._shooters.splice(index, 1);
+                    this._projectiles.splice(ind, 1);
+                }
             }
         });
     }
@@ -311,6 +375,27 @@ class Scoreboard {
         this.context.fillText("Score: " + this._points, window.innerWidth - 175, 50);
     }
 }
-class Shooter {
+class Shooter extends GameItem {
+    constructor(radius = 10, colour, xPosition = 0, yPosition = 0, xVelocity, yVelocity) {
+        super(radius, colour, xPosition, yPosition);
+        this._xVel = xVelocity;
+        this._yVel = yVelocity;
+        this._life = 1;
+    }
+    draw() {
+        const img = new Image();
+        img.src = "./assets/img/fireball.png";
+        this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+    }
+    update() {
+        if (this._xPos + this._radius > innerWidth || this._xPos - this._radius < 0) {
+            this._life = 0;
+        }
+        if (this._yPos + this._radius > innerHeight || this._yPos - this._radius < 0) {
+            this._life = 0;
+        }
+        this._xPos += this._xVel;
+        this._yPos += this._yVel;
+    }
 }
 //# sourceMappingURL=main.js.map

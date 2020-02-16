@@ -5,8 +5,8 @@ class GameItem {
     //attr
     protected _radius: number;
     protected _colour: string;
-    protected _xPos: number;
-    protected _yPos: number;
+    public _xPos: number;
+    public _yPos: number;
     
     /**
     * Function to create the GameItem
