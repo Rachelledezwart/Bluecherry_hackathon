@@ -38,29 +38,31 @@ const int httpPort = 80;
 // Initialize display on address 0x3c, SDA==25 and SCL == 26
 SSD1306Wire display(0x3c, 25, 26);
 MPU6050 mpu6050(Wire);
+int lives=12345;
+int score=67890;
 
 // Letters
 static const unsigned char PROGMEM letter_s[] =
 {
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00000011, B11000000,
+    B00001111, B11110000,
+    B00011100, B00111000,
+    B00111000, B00011000,
+    B00110000, B00000000,
+    B00110000, B00000000,
+    B00111000, B00000000,
+    B00011100, B00000000,
+    B00000111, B10000000,
+    B00000001, B11100000,
+    B00000000, B00111000,
+    B00000000, B00011100,
+    B00000000, B00001100,
+    B00000000, B00001100,
+    B00011000, B00011100,
+    B00011100, B00111000,
+    B00001111, B11110000,
+    B00000011, B11000000,
     B00000000, B00000000
 };
 
@@ -68,22 +70,22 @@ static const unsigned char PROGMEM letter_l[] =
 {
     B00000000, B00000000,
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011000, B00000000,
+    B00011111, B11111000,
+    B00011111, B11111000,
     B00000000, B00000000,
     B00000000, B00000000
 };
@@ -93,6 +95,9 @@ static const unsigned char PROGMEM letter_colon[] =
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
@@ -101,23 +106,258 @@ static const unsigned char PROGMEM letter_colon[] =
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
-    B00000000, B00000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
+    B00000011, B10000000,
     B00000000, B00000000,
     B00000000, B00000000,
     B00000000, B00000000
 };
 
-void drawBitmap(const unsigned char* bitmap) {
+// Numbers
+static const unsigned char PROGMEM number_0[] =
+{
+  0x1f, 0xf8,
+  0x10, 0x08,
+  0x72, 0x4e,
+  0xc0, 0x03,
+  0x87, 0xe1,
+  0xac, 0x35,
+  0x88, 0x11,
+  0x88, 0x11,
+  0xa8, 0x15,
+  0x88, 0x11,
+  0x88, 0x11,
+  0xa8, 0x15,
+  0x88, 0x11,
+  0x88, 0x11,
+  0xac, 0x35,
+  0x87, 0xe1,
+  0xc0, 0x03,
+  0x72, 0x4e,
+  0x10, 0x08,
+  0x1f, 0xf8
+};
+static const unsigned char PROGMEM number_1[] =
+{
+  0x0f, 0xf8,
+  0x10, 0x08,
+  0x24, 0x88,
+  0x40, 0x08,
+  0x93, 0x08,
+  0x45, 0x48,
+  0x29, 0x08,
+  0x11, 0x08,
+  0x01, 0x48,
+  0x01, 0x08,
+  0x01, 0x08,
+  0x01, 0x48,
+  0x01, 0x08,
+  0x01, 0x08,
+  0x01, 0x48,
+  0x1f, 0x0f,
+  0x10, 0x01,
+  0x12, 0x49,
+  0x10, 0x01,
+  0x1f, 0xff
+};
+static const unsigned char PROGMEM number_2[] =
+{
+  0x0f, 0xe0,
+  0x10, 0x10,
+  0x21, 0x08,
+  0x50, 0x04,
+  0x83, 0xa2,
+  0x44, 0x81,
+  0x29, 0x81,
+  0x12, 0x09,
+  0x04, 0x01,
+  0x08, 0x41,
+  0x10, 0x06,
+  0x22, 0x18,
+  0x40, 0x60,
+  0x80, 0x80,
+  0x89, 0x00,
+  0x83, 0xff,
+  0x80, 0x01,
+  0x88, 0x89,
+  0x80, 0x01,
+  0xff, 0xff
+};
+static const unsigned char PROGMEM number_3[] =
+{
+  0x1f, 0xe0,
+  0x20, 0x10,
+  0x49, 0x08,
+  0x80, 0x24,
+  0xa3, 0x82,
+  0x84, 0x49,
+  0x88, 0x21,
+  0xf0, 0x41,
+  0x00, 0x92,
+  0x01, 0x04,
+  0x01, 0x48,
+  0x01, 0x04,
+  0xf8, 0x92,
+  0x88, 0x41,
+  0xa8, 0x25,
+  0x84, 0x41,
+  0x83, 0x92,
+  0x48, 0x04,
+  0x30, 0x08,
+  0x1f, 0xf0
+};
+static const unsigned char PROGMEM number_4[] =
+{
+  0xfc, 0x3f,
+  0x84, 0x21,
+  0xa4, 0x25,
+  0x84, 0x21,
+  0x84, 0x21,
+  0x84, 0x21,
+  0xa7, 0xe5,
+  0x80, 0x01,
+  0x80, 0x01,
+  0xa2, 0x21,
+  0x80, 0x01,
+  0xff, 0xe1,
+  0x00, 0x25,
+  0x00, 0x21,
+  0x00, 0x21,
+  0x00, 0x21,
+  0x00, 0x21,
+  0x00, 0x25,
+  0x00, 0x21,
+  0x00, 0x3f
+};
+static const unsigned char PROGMEM number_5[] =
+{
+  0xff, 0xff,
+  0x80, 0x01,
+  0x88, 0x89,
+  0x80, 0x01,
+  0x87, 0xff,
+  0xa4, 0x00,
+  0x87, 0xf0,
+  0x80, 0x08,
+  0x82, 0x04,
+  0x80, 0x12,
+  0xff, 0xc1,
+  0x00, 0x21,
+  0x00, 0x15,
+  0xf8, 0x11,
+  0x88, 0x21,
+  0x87, 0xc5,
+  0x90, 0x01,
+  0x81, 0x11,
+  0x40, 0x02,
+  0x3f, 0xfc
+};
+static const unsigned char PROGMEM number_6[] =
+{
+  0x1f, 0xf8,
+  0x20, 0x04,
+  0x44, 0x42,
+  0x80, 0x09,
+  0x87, 0xe1,
+  0x88, 0x11,
+  0xa8, 0x0f,
+  0x88, 0x00,
+  0x8b, 0xf0,
+  0xac, 0x08,
+  0x89, 0x24,
+  0x80, 0x02,
+  0xa1, 0xc1,
+  0x82, 0x29,
+  0x82, 0x21,
+  0x91, 0xc1,
+  0x80, 0x09,
+  0x44, 0x42,
+  0x20, 0x04,
+  0x1f, 0xf8
+};
+static const unsigned char PROGMEM number_7[] =
+{
+  0xff, 0xff,
+  0x80, 0x01,
+  0x91, 0x09,
+  0x80, 0x01,
+  0x80, 0x01,
+  0xff, 0xe1,
+  0x00, 0x25,
+  0x00, 0x41,
+  0x00, 0x81,
+  0x01, 0x12,
+  0x02, 0x04,
+  0x04, 0x88,
+  0x08, 0x10,
+  0x10, 0x20,
+  0x24, 0x40,
+  0x40, 0x80,
+  0x41, 0x00,
+  0x4a, 0x00,
+  0x42, 0x00,
+  0x7e, 0x00
+};
+static const unsigned char PROGMEM number_8[] =
+{
+  0x1f, 0xf8,
+  0x20, 0x04,
+  0x42, 0x22,
+  0x80, 0x01,
+  0x93, 0xc5,
+  0x84, 0x21,
+  0x84, 0x21,
+  0xa4, 0x25,
+  0x83, 0xc1,
+  0x40, 0x02,
+  0x28, 0x94,
+  0x20, 0x04,
+  0x40, 0x02,
+  0x93, 0xc9,
+  0x84, 0x21,
+  0x84, 0x21,
+  0x93, 0xc9,
+  0x40, 0x02,
+  0x20, 0x04,
+  0x1f, 0xf8
+};
+static const unsigned char PROGMEM number_9[] =
+{
+  0x1f, 0xf8,
+  0x20, 0x04,
+  0x42, 0x22,
+  0x80, 0x01,
+  0x97, 0xe1,
+  0x84, 0x21,
+  0x84, 0x25,
+  0x97, 0xe1,
+  0x80, 0x01,
+  0x81, 0x09,
+  0x40, 0x01,
+  0x3f, 0xf1,
+  0x00, 0x11,
+  0xf8, 0x15,
+  0x84, 0x21,
+  0x93, 0xc1,
+  0x40, 0x12,
+  0x24, 0x84,
+  0x10, 0x08,
+  0x0f, 0xf0
+};
+
+
+
+void drawBitmap(const unsigned char* bitmap, int _x, int _y) {
     for (int y=0; y<BITMAP_HEIGHT; y++) {
         for (int x=0; x<BITMAP_WIDTH/8; x++) {
-            ddrawPixel(x, y, 1);
+          for(int b=0; b<8;b++){
+            if((bitmap[2*y+x]&(0x80>>b))>0)
+              display.setPixelColor(b+8*x+_x, y+15+_y, WHITE);
+          }
         }
     }
+    dblit();
 }
 
 // Initialize TCP client and PubSubClient for MQTT
@@ -164,16 +404,24 @@ void dprint(char* line) {
     ddrawLogBuffer();
     dblit();
 }
-void ddrawPixel(int x, int y, int color) {
-    display.drawPixel(x, y, color); // TODO: OK EVAN
-}
+/*void ddrawPixel(int x, int y, int color) {
+    display.setPixel(x, y, color); // TODO: OK EVAN
+}*/
 
 void callback(char* topic, byte *payload, unsigned int length) {
-    char recv[255] = "";
-    for(int i = 0; i < length; i++){
-        recv[i] = (char)payload[i];
+    if (length != 8) return;
+    char rScore[4] = "";
+    char rLives[3] = "";
+    for(int i = 0; i < 4; i++){
+        rScore[i] = (char)payload[i];
     }
-    dprintln(recv);
+    for(int i = 0; i < 3; i++){
+        rLives[i]= (char)payload[i+5];
+    }
+    lives = String(rLives).toInt();
+    score = String(rScore).toInt();
+
+    
 }
 
 void reconnect() {
@@ -234,17 +482,57 @@ void setup() {
 
     //pinBeeps();
 
-    drawBitmap(letter_l);
+    display.clear();
 }
 
 
 
 void loop() {
+    int char_offset_x = 2;
+    int char_offset_y = 2;
+  
     if(!psclient.connected()){
         reconnect();
     }
     psclient.loop();
-    display.println("BUP");
+    drawBitmap(letter_l,char_offset_x,char_offset_y);
+    drawBitmap(letter_s,char_offset_x,20 + 2 * char_offset_y);
+    drawBitmap(letter_colon, 14, char_offset_y);
+    drawBitmap(letter_colon, 14, 20 + 2 * char_offset_y);
+
+    String convLives = String(lives).c_str();
+    for(int i=0; i<convLives.length(); i++){
+      int index = String(convLives[i]).toInt();
+      switch(index){
+         case 0: drawBitmap(number_0,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 1: drawBitmap(number_1,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 2: drawBitmap(number_2,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 3: drawBitmap(number_3,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 4: drawBitmap(number_4,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 5: drawBitmap(number_5,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 6: drawBitmap(number_6,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 7: drawBitmap(number_7,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 8: drawBitmap(number_8,28+(16+char_offset_x)*i, char_offset_y); break;
+         case 9: drawBitmap(number_9,28+(16+char_offset_x)*i, char_offset_y); break;
+      }
+    }
+    String convScore = String(score).c_str();
+    for(int i=0; i<convScore.length(); i++){
+      int index2 = String(convScore[i]).toInt();
+      switch(index2){
+         case 0: drawBitmap(number_0,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 1: drawBitmap(number_1,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 2: drawBitmap(number_2,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 3: drawBitmap(number_3,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 4: drawBitmap(number_4,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 5: drawBitmap(number_5,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 6: drawBitmap(number_6,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 7: drawBitmap(number_7,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 8: drawBitmap(number_8,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+         case 9: drawBitmap(number_9,28+(16+char_offset_x)*i, 20 + 2 * char_offset_y); break;
+      }
+    }
+    
     mpu6050.update();
     char buf[100];
     String xcomp = String(mpu6050.getGyroX()).c_str();
@@ -252,6 +540,8 @@ void loop() {
     strcpy(buf, xcomp.c_str());
     strcat(buf, ",");
     strcat(buf, ycomp.c_str());
+    strcat(buf, ",");
+    strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed
     psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
-    delay(500);
+    delay(100);
 }
