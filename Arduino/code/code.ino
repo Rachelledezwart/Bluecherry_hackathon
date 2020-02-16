@@ -546,6 +546,12 @@ void psclientSetup(){
 
 void lose() {
   dclear();
+  dprint("               S ");
+  for (int i = String(score).length(); i < 4; i++)
+    dprint("0");
+  dprintln(String(score).c_str());
+  for (int i = 0; i < 4; i++)
+    dprintln("");
   drawBitmap(image_death, 0, 0, 128, 44);
   
   size_t len = sizeof(music_death)/sizeof(music_death[0]);
