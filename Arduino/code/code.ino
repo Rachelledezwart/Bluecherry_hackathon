@@ -1,6 +1,7 @@
 // Include libraries
 #include <Wire.h>
 #include <MPU6050_tockn.h>
+#include <BH1750.h>
 #include <WiFi.h>
 #include <PubSubClient.h>
 
@@ -31,6 +32,7 @@ const char* host = "192.168.1.29";
 const int httpPort = 80;
 
 MPU6050 mpu6050(Wire);
+BH1750 lightMeter;
 int lives=0;
 int score=0;
 
@@ -98,7 +100,7 @@ void callback(char* topic, byte *payload, unsigned int length) {
       
       if (newLives == 0 && lives > 0) {
         // Play dead
-        delay(100);
+        delay(1000);
         lose();
       }
     }
@@ -176,9 +178,6 @@ void setup() {
     // Init piezo
     setupPiezo();
 
-    // Init serial connection
-    Serial.begin(9600);
-
     // Init display
     dinit();
     // Contrast - how bright the screen ought to be
@@ -195,7 +194,9 @@ void setup() {
     dprint("Connecting to WiFi");
 
     mpu6050.begin();
-    mpu6050.calcGyroOffsets(true);
+    // pu6050.calcGyroOffsets(true);
+    lightMeter.begin();
+    
     WiFi.begin(ssid, password);
 
     // Print dots until connected
@@ -270,5 +271,5 @@ void loop() {
     strcat(buf, ",");
     strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed
     psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
-    delay(100);
+    delay(50);
 }

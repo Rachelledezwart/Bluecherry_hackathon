@@ -42,6 +42,7 @@ class Character extends GameItem {
     */
     public set SetHealth(health: number) {
         this._health = health;
+        window.publishStats();
     }
 
     /**
