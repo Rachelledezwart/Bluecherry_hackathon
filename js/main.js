@@ -122,6 +122,7 @@ var Character = (function (_super) {
         var _this = _super.call(this, radius, colour, xPosition, yPosition) || this;
         _this._health = 3;
         _this.position = position;
+        _this.ability_1 = 0;
         return _this;
     }
     Object.defineProperty(Character.prototype, "SetPositionX", {
@@ -205,12 +206,38 @@ var Game = (function () {
             if ((_this.position_y < -10 || _this.keys[83]) && _this._player.yPosition + _this._player.radius < innerHeight) {
                 _this._player.SetPositionY = _this._player.yPosition + movementSpeed;
                 _this._player.SetPositionY = _this._player.yPosition + (_this.position_y / 100);
-                _this._player.SetPosition = 1;
+                _this._player.SetPosition = 2;
             }
             if ((_this.position_y > 10 || _this.keys[87]) && _this._player.yPosition - _this._player.radius > 0) {
                 _this._player.SetPositionY = _this._player.yPosition - movementSpeed;
                 _this._player.SetPositionY = _this._player.yPosition + (_this.position_y / 100);
                 _this._player.SetPosition = 3;
+            }
+            if (_this.shooting === 1 || _this.keys[32]) {
+                var playerX = _this._player._xPos;
+                var playerY = _this._player._yPos;
+                var rotationX = 0;
+                var rotationY = 0;
+                if (_this._player.position === 2) {
+                    rotationY = 10;
+                    rotationX = 0;
+                }
+                else if (_this._player.position === 1) {
+                    rotationY = 0;
+                    rotationX = 10;
+                }
+                else if (_this._player.position === 3) {
+                    rotationY = -10;
+                    rotationX = 0;
+                }
+                else {
+                    rotationY = 0;
+                    rotationX = -10;
+                }
+                if (_this._player.ability_1 === 0) {
+                    _this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX, rotationY));
+                    _this._player.ability_1 += 500;
+                }
             }
             _this.update();
         };
@@ -220,6 +247,7 @@ var Game = (function () {
         this.shooting = 0;
         this._projectiles = new Array();
         this._boosters = new Array();
+        this._shooters = new Array();
         this._player = new Character(playerRadius, "#912F40", window.innerWidth / 2 - playerRadius / 2, window.innerHeight / 2 - playerRadius / 2);
         this._score = new Scoreboard(0);
         window.addEventListener('keydown', function (e) {
@@ -252,7 +280,6 @@ var Game = (function () {
         var spawnNumber = Math.floor(Math.random() * (3 - 0 + 1)) + 0;
         var spawnKind = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
         var spawnTime = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
-        console.log(this._player.position);
         if (spawnNumber > 2) {
             if (spawnKind == 1) {
                 this._boosters.push(new Booster("health", 10, "#3CB371", xPos, yPos));
@@ -277,14 +304,22 @@ var Game = (function () {
                 projectile.draw();
                 projectile.update();
             });
+            this._shooters.map(function (shooters) {
+                shooters.draw();
+                shooters.update();
+            });
             this._boosters.map(function (booster) {
                 booster.draw();
             });
             this.CheckCollisionProjectile();
             this.CheckCollisionBooster();
+            this.CheckCollisionShooter();
             this._player.drawHealth();
             this._player.draw();
             this._score.draw();
+            if (this._player.ability_1 > 0) {
+                this._player.ability_1 = this._player.ability_1 - 10;
+            }
         }
         else {
             var score = this._score.getScore;
@@ -305,6 +340,24 @@ var Game = (function () {
                 console.log("Collision");
                 _this._projectiles.splice(index, 1);
                 _this._player.SetHealth = _this._player.health - 1;
+            }
+        });
+    };
+    Game.prototype.CheckCollisionShooter = function () {
+        var _this = this;
+        this._shooters.map(function (shooter, index) {
+            console.log(shooter);
+            if (shooter._life === 0) {
+                _this._shooters.splice(index, 1);
+            }
+            for (var ind = 0; ind < _this._projectiles.length; ind++) {
+                var projectile = _this._projectiles[ind];
+                var distance = _this.Distance(shooter.xPosition, shooter.yPosition, projectile);
+                if (distance < projectile.radius + projectile.radius) {
+                    console.log("Collision");
+                    _this._shooters.splice(index, 1);
+                    _this._projectiles.splice(ind, 1);
+                }
             }
         });
     };
@@ -341,37 +394,11 @@ var app = {};
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var init;
     return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                init = function () {
-                    app.game = new Game();
-                };
-                window.addEventListener('load', init);
-                return [4, window.setupMqtt('ws://192.168.1.29:8000')];
-            case 1:
-                _a.sent();
-                return [4, window.subscribeMqtt('hz/bluecherry/backstory')];
-            case 2:
-                _a.sent();
-                return [4, window.subscribeMqtt('hz/bluecherry/backstory-rec')];
-            case 3:
-                _a.sent();
-                return [4, window.registerMessageListenerMqtt('hz/bluecherry/backstory', function (msg) {
-                        var msgArr = msg.split(',');
-                        app.game.position_y = msgArr[0];
-                        app.game.position_x = msgArr[1];
-                        app.game.shooting = msgArr[2];
-                    })];
-            case 4:
-                _a.sent();
-                setInterval(function () {
-                    var score = lpad(app.game._score._points, 4, '0');
-                    var health = lpad(app.game._player._health, 3, '0');
-                    var string = score + ',' + health;
-                    window.publishMqtt('hz/bluecherry/backstory-rec', string);
-                }, 1000);
-                return [2];
-        }
+        init = function () {
+            app.game = new Game();
+        };
+        window.addEventListener('load', init);
+        return [2];
     });
 }); })();
 function lpad(s, width, char) {
@@ -437,9 +464,33 @@ var Scoreboard = (function () {
     };
     return Scoreboard;
 }());
-var Shooter = (function () {
-    function Shooter() {
+var Shooter = (function (_super) {
+    __extends(Shooter, _super);
+    function Shooter(radius, colour, xPosition, yPosition, xVelocity, yVelocity) {
+        if (radius === void 0) { radius = 10; }
+        if (xPosition === void 0) { xPosition = 0; }
+        if (yPosition === void 0) { yPosition = 0; }
+        var _this = _super.call(this, radius, colour, xPosition, yPosition) || this;
+        _this._xVel = xVelocity;
+        _this._yVel = yVelocity;
+        _this._life = 1;
+        return _this;
     }
+    Shooter.prototype.draw = function () {
+        var img = new Image();
+        img.src = "./assets/img/fireball.png";
+        this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
+    };
+    Shooter.prototype.update = function () {
+        if (this._xPos + this._radius > innerWidth || this._xPos - this._radius < 0) {
+            this._life = 0;
+        }
+        if (this._yPos + this._radius > innerHeight || this._yPos - this._radius < 0) {
+            this._life = 0;
+        }
+        this._xPos += this._xVel;
+        this._yPos += this._yVel;
+    };
     return Shooter;
-}());
+}(GameItem));
 //# sourceMappingURL=main.js.map

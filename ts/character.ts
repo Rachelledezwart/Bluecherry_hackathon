@@ -4,6 +4,7 @@ class Character extends GameItem {
     //attr
     private _health: number;
     public position: number; 
+    public ability_1: number;
     
     /**
     * Function to create the Character
@@ -16,6 +17,7 @@ class Character extends GameItem {
         super(radius, colour, xPosition, yPosition);
         this._health = 3;
         this.position = position;
+        this.ability_1 = 0;
     }
 
     /**

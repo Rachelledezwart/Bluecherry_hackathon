@@ -5,6 +5,7 @@ class Game {
     //attr
     private _projectiles: Array<Projectile>;
     private _boosters: Array<Booster>;
+    private _shooters: Array<Shooter>
     private _player: Character;
     private _score: Scoreboard;
 
@@ -27,6 +28,7 @@ class Game {
         //create some gameItems
         this._projectiles = new Array();
         this._boosters = new Array();
+        this._shooters = new Array(); 
         this._player = new Character(playerRadius, "#912F40", window.innerWidth / 2 - playerRadius / 2, window.innerHeight / 2 - playerRadius / 2);
         this._score = new Scoreboard(0);
 
@@ -73,13 +75,42 @@ class Game {
         if ((this.position_y  < -10|| this.keys[83]) && this._player.yPosition + this._player.radius < innerHeight) {
             this._player.SetPositionY = this._player.yPosition + movementSpeed;
             this._player.SetPositionY = this._player.yPosition + (this.position_y / 100);
-            this._player.SetPosition = 1;
+            this._player.SetPosition = 2;
         }
 
         if ((this.position_y > 10 || this.keys[87]) && this._player.yPosition - this._player.radius > 0) {
             this._player.SetPositionY = this._player.yPosition - movementSpeed;
             this._player.SetPositionY = this._player.yPosition + (this.position_y / 100);
             this._player.SetPosition = 3;
+        }
+
+        if (this.shooting === 1 || this.keys[32]) {
+
+            const playerX = this._player._xPos;
+            const playerY = this._player._yPos;
+
+            let rotationX = 0;
+            let rotationY = 0; 
+
+            if (this._player.position === 2) {
+                rotationY = 10;
+                rotationX = 0;
+            } else if (this._player.position === 1 ) {
+                rotationY = 0; 
+                rotationX = 10
+            } else if (this._player.position === 3) {
+                rotationY = -10;
+                rotationX = 0;
+            } else {
+                rotationY = 0; 
+                rotationX = -10;
+            }
+
+            if (this._player.ability_1 === 0) {
+                this._shooters.push(new Shooter(20, '#FFF', playerX, playerY, rotationX , rotationY));
+                this._player.ability_1 += 500;
+            }
+            
         }
 
         this.update();
@@ -119,8 +150,6 @@ class Game {
         let spawnKind = Math.floor(Math.random() * (2 - 0 + 1)) + 0;
         let spawnTime = Math.floor(Math.random() * (20 - 3 + 1)) + 3;
 
-        console.log(this._player.position);
-
         if (spawnNumber > 2) {
             if (spawnKind == 1) {
                 this._boosters.push(new Booster("health", 10, "#3CB371", xPos, yPos));
@@ -151,15 +180,27 @@ class Game {
                 projectile.update();
             });
 
+            
+            this._shooters.map((shooters) => {
+                shooters.draw();
+                shooters.update();
+            });
+
             this._boosters.map((booster) => {
                 booster.draw();
             })
 
             this.CheckCollisionProjectile();
             this.CheckCollisionBooster();
+            this.CheckCollisionShooter();
             this._player.drawHealth();
             this._player.draw();
             this._score.draw();
+
+            if (this._player.ability_1 > 0) {
+                this._player.ability_1 = this._player.ability_1 - 10; 
+            }
+            
 
         } else {
             let score = this._score.getScore;
@@ -188,6 +229,30 @@ class Game {
                 console.log("Collision");
                 this._projectiles.splice(index, 1);
                 this._player.SetHealth = this._player.health - 1;
+            }
+
+        });
+    }
+
+    public CheckCollisionShooter() {
+        this._shooters.map((shooter, index) => {
+            console.log(shooter);
+
+            if (shooter._life === 0){
+                this._shooters.splice(index, 1);
+            }
+
+            for (let ind = 0; ind < this._projectiles.length; ind++) {
+                const projectile = this._projectiles[ind];
+
+                
+                let distance = this.Distance(shooter.xPosition, shooter.yPosition, projectile);
+                
+                if (distance < projectile.radius + projectile.radius) {
+                    console.log("Collision");
+                    this._shooters.splice(index, 1);
+                    this._projectiles.splice(ind, 1);
+                }
             }
 
         });
