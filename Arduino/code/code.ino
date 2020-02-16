@@ -35,6 +35,7 @@ MPU6050 mpu6050(Wire);
 BH1750 lightMeter;
 int lives=0;
 int score=0;
+int highScore=0;
 
 // Music
 static const unsigned int PROGMEM music_death[] = { 658, 0, 621, 658, 0, 880, 0, 0, 880, 553, 0, 0, 588, 0, 0, 220, 0, 0, 184 };
@@ -116,6 +117,8 @@ void callback(char* topic, byte *payload, unsigned int length) {
       delay(50);
       silencePiezo();
     }
+    if (newScore > highScore)
+      highScore = newScore;
 
     lives = newLives;
     score = newScore;
@@ -145,10 +148,15 @@ void psclientSetup(){
 
 void lose() {
   dclear();
-  dprint("               S ");
+  dprint("         S ");
   for (int i = String(score).length(); i < 4; i++)
     dprint("0");
-  dprintln(String(score).c_str());
+  dprint(String(score).c_str());
+  dprint(" ");
+  dprint(" Hi ");
+  for (int i = String(highScore).length(); i < 4; i++)
+    dprint("0");
+  dprintln(String(highScore).c_str());
   for (int i = 0; i < 4; i++)
     dprintln("");
   drawBitmap(image_death, 0, 0, 128, 44);
@@ -216,6 +224,7 @@ void setup() {
 
 
 void loop() {
+  lose();
     int char_offset_x = 2;
     int char_offset_y = 2;
   
