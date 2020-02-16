@@ -32,6 +32,7 @@ const char* host = "192.168.1.29";
 const int httpPort = 80;
 
 MPU6050 mpu6050(Wire);
+BH1750 lightMeter;
 int lives=0;
 int score=0;
 
@@ -177,9 +178,6 @@ void setup() {
     // Init piezo
     setupPiezo();
 
-    // Init serial connection
-    Serial.begin(9600);
-
     // Init display
     dinit();
     // Contrast - how bright the screen ought to be
@@ -196,7 +194,9 @@ void setup() {
     dprint("Connecting to WiFi");
 
     mpu6050.begin();
-    mpu6050.calcGyroOffsets(true);
+    // pu6050.calcGyroOffsets(true);
+    lightMeter.begin();
+    
     WiFi.begin(ssid, password);
 
     // Print dots until connected
