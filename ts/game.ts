@@ -255,7 +255,6 @@ class Game {
 
             if (distance < projectile.radius + this._player.radius) {
                 console.log("Collision");
-                this._score.setScore += 1;
                 this._projectiles.splice(index, 1);
                 this._player.SetHealth = this._player.health - 1;
             }
@@ -265,7 +264,6 @@ class Game {
 
     public CheckCollisionShooter() {
         this._shooters.map((shooter, index) => {
-            console.log(shooter);
 
             if (shooter._life === 0){
                 this._shooters.splice(index, 1);
@@ -279,6 +277,7 @@ class Game {
                 
                 if (distance < projectile.radius + projectile.radius) {
                     console.log("Collision");
+                    this._score.setScore = this._score.getScore + 1;
                     this._shooters.splice(index, 1);
                     this._projectiles.splice(ind, 1);
                 }
