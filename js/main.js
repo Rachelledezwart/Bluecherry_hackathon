@@ -264,6 +264,7 @@ class Game {
             let distance = this.Distance(projectile.xPosition, projectile.yPosition, this._player);
             if (distance < projectile.radius + this._player.radius) {
                 console.log("Collision");
+                this._score.setScore += 1;
                 this._projectiles.splice(index, 1);
                 this._player.SetHealth = this._player.health - 1;
             }
