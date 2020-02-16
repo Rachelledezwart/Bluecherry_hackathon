@@ -14,7 +14,7 @@ class Shooter extends GameItem {
     * @param {number} - yPosition
     */
     // constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0, xVelocity: number, yVelocity: number) {
-    constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0, xVelocity: number, yVelocity: number) {
+    constructor(radius:number = 10, colour: string, xPosition: number = 0, yPosition: number = 0, xVelocity: number, yVelocity: number, public img: string) {
         super(radius, colour, xPosition, yPosition);
         this._xVel = xVelocity; 
         this._yVel = yVelocity;
@@ -32,14 +32,14 @@ class Shooter extends GameItem {
         // this.context.strokeStyle = this._colour;
         // this.context.stroke();
         
-        const img = new Image()
-        img.src = "./assets/img/fireball.png"
+        const img = new Image();
+        img.src = this.img; 
         
         this.context.drawImage(img, this._xPos - 30, this._yPos - 30);
     }
 
     public setDirection(): void {
-        
+
     }
 
     /**
