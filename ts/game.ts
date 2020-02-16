@@ -91,7 +91,7 @@ class Game {
         this._player.SetPositionY = current_y + y_speed;
 
 
-        if (this.shooting === 1 || this.keys[32]) {
+        if (this.shooting > 0 || this.keys[32]) {
 
             const playerX = this._player._xPos;
             const playerY = this._player._yPos;

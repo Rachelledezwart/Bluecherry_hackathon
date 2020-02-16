@@ -215,7 +215,7 @@ var Game = (function () {
             }
             _this._player.SetPositionX = current_x + x_speed;
             _this._player.SetPositionY = current_y + y_speed;
-            if (_this.shooting === 1 || _this.keys[32]) {
+            if (_this.shooting > 0 || _this.keys[32]) {
                 var playerX = _this._player._xPos;
                 var playerY = _this._player._yPos;
                 var rotationX = 0;
@@ -396,11 +396,38 @@ var app = {};
 (function () { return __awaiter(_this, void 0, void 0, function () {
     var init;
     return __generator(this, function (_a) {
-        init = function () {
-            app.game = new Game();
-        };
-        window.addEventListener('load', init);
-        return [2];
+        switch (_a.label) {
+            case 0:
+                init = function () {
+                    app.game = new Game();
+                };
+                window.addEventListener('load', init);
+                return [4, window.setupMqtt('ws://192.168.1.29:8000')];
+            case 1:
+                _a.sent();
+                return [4, window.subscribeMqtt('hz/bluecherry/backstory')];
+            case 2:
+                _a.sent();
+                return [4, window.subscribeMqtt('hz/bluecherry/backstory-rec')];
+            case 3:
+                _a.sent();
+                return [4, window.registerMessageListenerMqtt('hz/bluecherry/backstory', function (msg) {
+                        var msgArr = msg.split(',');
+                        app.game.position_y = msgArr[0];
+                        app.game.position_x = msgArr[1];
+                        app.game.shooting = msgArr[2];
+                        console.log(app.game.shooting);
+                    })];
+            case 4:
+                _a.sent();
+                setInterval(function () {
+                    var score = lpad(app.game._score._points, 4, '0');
+                    var health = lpad(app.game._player._health, 3, '0');
+                    var string = score + ',' + health;
+                    window.publishMqtt('hz/bluecherry/backstory-rec', string);
+                }, 1000);
+                return [2];
+        }
     });
 }); })();
 function lpad(s, width, char) {
