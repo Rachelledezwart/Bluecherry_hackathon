@@ -576,21 +576,21 @@ void lose() {
 }
 
 void setup() {
-    // Opzetten piezo
+    // Init piezo
     setupPiezo();
 
-    // Seriele connectie opzetten
+    // Init serial connection
     Serial.begin(9600);
 
-    // Init display"
+    // Init display
     display.init();
-    // Kleurcontrast - hoe fel staat het scherm
+    // Contrast - how bright the screen ought to be
     display.setContrast(255);
     // Clear
     display.clear();
-    // Goed om zetten
+    // Good to set, makes life easier
     display.flipScreenVertically();
-    // Buffer aanmaken voor tekst contents scherm
+    // Create buffer for saving screen contents
     display.setLogBuffer(5, 30);
 
     dprintln("Booting...");
@@ -671,7 +671,7 @@ void loop() {
     strcat(buf, ",");
     strcat(buf, ycomp.c_str());
     strcat(buf, ",");
-    strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed
+    strcat(buf, String(!digitalRead(0)).c_str()); //fire pressed. Unpressed == HIGH, Pressed == LOW
     psclient.publish(MQTT_SERIAL_PUBLISH_CH,buf);
     delay(100);
 }
