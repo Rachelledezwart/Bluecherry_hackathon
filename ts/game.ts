@@ -60,29 +60,36 @@ class Game {
 
         let movementSpeed = 10;
 
-        if ((this.position_x > 10 || this.keys[65]) && this._player.xPosition - this._player.radius > 0) {
-            this._player.SetPositionX = this._player.xPosition - movementSpeed;
-            this._player.SetPositionX = this._player.xPosition + (this.position_x / 100);
-            this._player.SetPosition = 0;
+        // Arduino makes strings?!
+        this.position_x = parseInt(this.position_x.toString());
+        this.position_y = parseInt(this.position_y.toString());
+        
+        // Check for inputs
+        let x_speed = this.keys[68] ? movementSpeed : (this.keys[65] ? -movementSpeed : (Math.abs(this.position_x) > 10 ? -this.position_x/7 : 0));
+        let y_speed = this.keys[83] ? movementSpeed : (this.keys[87] ? -movementSpeed : (Math.abs(this.position_y) > 10 ? -this.position_y/7 : 0));
+
+        let current_x = this._player.xPosition;
+        let current_y = this._player.yPosition;
+
+        let boundary_x = this.canvas.width;
+        let boundary_y = this.canvas.height;
+
+        if (current_x + x_speed > boundary_x) {
+            x_speed = boundary_x - current_x;
+        }
+        if (current_y + y_speed > boundary_y) {
+            y_speed = boundary_y - current_y;
+        }
+        if (current_x + x_speed < 0) {
+            x_speed = - current_x;
+        }
+        if (current_y + y_speed < 0) {
+            y_speed = - current_y;
         }
 
-        if ((this.position_x < -10 || this.keys[68]) && this._player.xPosition + this._player.radius < innerWidth) {
-            this._player.SetPositionX = this._player.xPosition + movementSpeed;
-            this._player.SetPositionX = this._player.xPosition + (this.position_x / 100);
-            this._player.SetPosition = 1;
-        }
+        this._player.SetPositionX = current_x + x_speed;
+        this._player.SetPositionY = current_y + y_speed;
 
-        if ((this.position_y  < -10|| this.keys[83]) && this._player.yPosition + this._player.radius < innerHeight) {
-            this._player.SetPositionY = this._player.yPosition + movementSpeed;
-            this._player.SetPositionY = this._player.yPosition + (this.position_y / 100);
-            this._player.SetPosition = 2;
-        }
-
-        if ((this.position_y > 10 || this.keys[87]) && this._player.yPosition - this._player.radius > 0) {
-            this._player.SetPositionY = this._player.yPosition - movementSpeed;
-            this._player.SetPositionY = this._player.yPosition + (this.position_y / 100);
-            this._player.SetPosition = 3;
-        }
 
         if (this.shooting === 1 || this.keys[32]) {
 

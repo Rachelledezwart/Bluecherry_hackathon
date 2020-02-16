@@ -193,26 +193,28 @@ var Game = (function () {
         this.gameLoop = function () {
             requestAnimationFrame(_this.gameLoop);
             var movementSpeed = 10;
-            if ((_this.position_x > 10 || _this.keys[65]) && _this._player.xPosition - _this._player.radius > 0) {
-                _this._player.SetPositionX = _this._player.xPosition - movementSpeed;
-                _this._player.SetPositionX = _this._player.xPosition + (_this.position_x / 100);
-                _this._player.SetPosition = 0;
+            _this.position_x = parseInt(_this.position_x.toString());
+            _this.position_y = parseInt(_this.position_y.toString());
+            var x_speed = _this.keys[68] ? movementSpeed : (_this.keys[65] ? -movementSpeed : (Math.abs(_this.position_x) > 10 ? -_this.position_x / 7 : 0));
+            var y_speed = _this.keys[83] ? movementSpeed : (_this.keys[87] ? -movementSpeed : (Math.abs(_this.position_y) > 10 ? -_this.position_y / 7 : 0));
+            var current_x = _this._player.xPosition;
+            var current_y = _this._player.yPosition;
+            var boundary_x = _this.canvas.width;
+            var boundary_y = _this.canvas.height;
+            if (current_x + x_speed > boundary_x) {
+                x_speed = boundary_x - current_x;
             }
-            if ((_this.position_x < -10 || _this.keys[68]) && _this._player.xPosition + _this._player.radius < innerWidth) {
-                _this._player.SetPositionX = _this._player.xPosition + movementSpeed;
-                _this._player.SetPositionX = _this._player.xPosition + (_this.position_x / 100);
-                _this._player.SetPosition = 1;
+            if (current_y + y_speed > boundary_y) {
+                y_speed = boundary_y - current_y;
             }
-            if ((_this.position_y < -10 || _this.keys[83]) && _this._player.yPosition + _this._player.radius < innerHeight) {
-                _this._player.SetPositionY = _this._player.yPosition + movementSpeed;
-                _this._player.SetPositionY = _this._player.yPosition + (_this.position_y / 100);
-                _this._player.SetPosition = 2;
+            if (current_x + x_speed < 0) {
+                x_speed = -current_x;
             }
-            if ((_this.position_y > 10 || _this.keys[87]) && _this._player.yPosition - _this._player.radius > 0) {
-                _this._player.SetPositionY = _this._player.yPosition - movementSpeed;
-                _this._player.SetPositionY = _this._player.yPosition + (_this.position_y / 100);
-                _this._player.SetPosition = 3;
+            if (current_y + y_speed < 0) {
+                y_speed = -current_y;
             }
+            _this._player.SetPositionX = current_x + x_speed;
+            _this._player.SetPositionY = current_y + y_speed;
             if (_this.shooting === 1 || _this.keys[32]) {
                 var playerX = _this._player._xPos;
                 var playerY = _this._player._yPos;
