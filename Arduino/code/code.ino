@@ -409,13 +409,19 @@ void dprint(char* line) {
 }*/
 
 void callback(char* topic, byte *payload, unsigned int length) {
-    char recv[255] = "";
-    for(int i = 0; i < length; i++){
-        recv[i] = (char)payload[i];
+    if (length != 8) return;
+    char rScore[4] = "";
+    char rLives[3] = "";
+    for(int i = 0; i < 4; i++){
+        rScore[i] = (char)payload[i];
     }
-    dprintln(recv);
+    for(int i = 0; i < 3; i++){
+        rLives[i]= (char)payload[i+5];
+    }
+    lives = String(rLives).toInt();
+    score = String(rScore).toInt();
 
-    if (length == 8) return;
+    
 }
 
 void reconnect() {
